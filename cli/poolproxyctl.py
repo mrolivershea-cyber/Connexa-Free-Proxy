@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-import sys, os, json, click, yaml, subprocess, re
+import sys, os, json, click, yaml, subprocess, re, random
 from pathlib import Path
+from typing import List, Optional
 
 CONFIG_PATH = Path("/etc/connexa/config.yaml")
 HAPROXY_TMPL = Path("/etc/haproxy/haproxy.cfg.tmpl")
@@ -12,7 +13,7 @@ TOR_POOL_DIR = Path("/etc/tor/pool")
 TOR_DATA_DIR = Path("/var/lib/tor/pool")
 
 # ---------- helpers ----------
-def sh(cmd: list[str], check=True) -> subprocess.CompletedProcess:
+def sh(cmd: List[str], check=True) -> subprocess.CompletedProcess:
     return subprocess.run(cmd, check=check, text=True, capture_output=True)
 
 def load_cfg():
@@ -58,12 +59,32 @@ def start_tor_pool(pool_size: int):
 
 # ---------- Rendering ----------
 def render_haproxy(port_start: int, pool_size: int):
-    if not HAPROXY_TMPL.exists():
-        raise FileNotFoundError(f"Missing template {HAPROXY_TMPL}")
-    port_end = port_start + pool_size - 1
-    tmpl = HAPROXY_TMPL.read_text()
-    cfg = tmpl.replace("{{PORT_RANGE_START}}", str(port_start)).replace("{{PORT_RANGE_END}}", str(port_end))
-    HAPROXY_CFG.write_text(cfg)
+    # Programmatically generate HAProxy config mapping external ports to local 3proxy ports (NOAUTH 42000+)
+    lines = [
+        "global",
+        "    daemon",
+        "    maxconn 20480",
+        "",
+        "defaults",
+        "    mode tcp",
+        "    timeout connect 5s",
+        "    timeout client  1m",
+        "    timeout server  1m",
+        "",
+    ]
+    for i in range(pool_size):
+        ext = port_start + i
+        beport = 42000 + i
+        lines += [
+            f"frontend fe_{ext}",
+            f"    bind *:{ext}",
+            f"    default_backend be_{beport}",
+            "",
+            f"backend be_{beport}",
+            f"    server s1 127.0.0.1:{beport} check",
+            "",
+        ]
+    HAPROXY_CFG.write_text("\n".join(lines) + "\n")
 
 def render_3proxy(pool_size: int):
     cfg_lines = [
@@ -79,7 +100,7 @@ def render_3proxy(pool_size: int):
             "auth none",
             "allow *",
             f"socks -n -a -p{auth_p} -i127.0.0.1 -e127.0.0.1",
-            f"parent 1000 socks5 127.0.0.1 {parent_port} \"\" \"\"",
+            f'parent 1000 socks5 127.0.0.1 {parent_port} "" ""',
         ]
         # NOAUTH backend
         noauth_p = 42000 + (i - 1)
@@ -88,11 +109,11 @@ def render_3proxy(pool_size: int):
             "auth none",
             "allow *",
             f"socks -n -a -p{noauth_p} -i127.0.0.1 -e127.0.0.1",
-            f"parent 1000 socks5 127.0.0.1 {parent_port} \"\" \"\"",
+            f'parent 1000 socks5 127.0.0.1 {parent_port} "" ""',
         ]
     THREEPROXY_CFG.write_text("\n".join(cfg_lines) + "\n")
 
-def write_whitelist(ips: list[str]):
+def write_whitelist(ips: List[str]):
     lines = []
     for ip in ips:
         ip = ip.strip()
@@ -102,6 +123,48 @@ def write_whitelist(ips: list[str]):
     if "127.0.0.1" not in lines:
         lines.append("127.0.0.1")
     WHITELIST_ACL.write_text("\n".join(lines) + "\n")
+
+# ---------- helpers: export ----------
+def build_export_endpoints(c: dict, host_override: Optional[str] = None) -> List[str]:
+    external = c.get("external", {}) or {}
+    pool_size = int(c.get("pool_size", 50))
+    port_start = int(external.get("port_start", 40000))
+    protocol = (external.get("protocol_default") or "socks5").lower()
+    host = host_override or external.get("host") or "127.0.0.1"
+    ports = range(port_start, port_start + pool_size)
+    scheme = "socks5" if "socks" in protocol else "http"
+    return [f"{scheme}://{host}:{p}" for p in ports]
+
+# ---------- helpers: mac ----------
+def list_ifaces() -> List[str]:
+    try:
+        return [d.name for d in Path("/sys/class/net").iterdir() if d.is_dir() and d.name != "lo"]
+    except Exception:
+        return []
+
+def read_mac(iface: str) -> str:
+    p = Path(f"/sys/class/net/{iface}/address")
+    return p.read_text().strip() if p.exists() else "00:00:00:00:00:00"
+
+def random_mac(prefix: Optional[str] = None) -> str:
+    if prefix:
+        base = prefix.split(":")
+        base = [b for b in base if b]
+        while len(base) < 3:
+            base.append("00")
+        seed = base[:3]
+        rnd = [random.randint(0x00, 0xFF) for _ in range(3)]
+        return ":".join(seed + [f"{b:02x}" for b in rnd])
+    return "02:%02x:%02x:%02x:%02x:%02x" % tuple(random.randint(0, 255) for _ in range(5))
+
+def set_mac_addr(iface: str, mac: str) -> bool:
+    try:
+        sh(["ip", "link", "set", "dev", iface, "down"], check=False)
+        r = sh(["ip", "link", "set", "dev", iface, "address", mac], check=False)
+        sh(["ip", "link", "set", "dev", iface, "up"], check=False)
+        return r.returncode == 0
+    except Exception:
+        return False
 
 # ---------- CLI ----------
 @click.group()
@@ -152,16 +215,14 @@ def selftest_run(profile):
     ok = True
     msgs = []
     try:
-        sh(["which", "haproxy"]) ; sh(["which", "3proxy"]) ; sh(["which", "tor"]) 
+        sh(["which", "haproxy"]); sh(["which", "3proxy"]); sh(["which", "tor"])
     except Exception as e:
         ok = False; msgs.append(f"binaries: {e}")
-    # check services
     for svc in ["haproxy", "3proxy"]:
         r = sh(["systemctl", "is-enabled", svc], check=False)
-        msgs.append(f"{svc}: enabled={{r.returncode==0}}")
-    # check one tor unit
+        msgs.append(f"{svc}: enabled={r.returncode==0}")
     r = sh(["systemctl", "is-active", "tor-pool@1"], check=False)
-    msgs.append(f"tor-pool@1 active={{r.returncode==0}}")
+    msgs.append(f"tor-pool@1 active={r.returncode==0}")
     print("\n".join(["[selftest] "+m for m in msgs]))
     print("[selftest] RESULT=", "OK" if ok else "FAIL")
 
@@ -178,8 +239,7 @@ def expose():
     print("[expose] Writing whitelist...")
     write_whitelist(wl)
     print("[expose] Restart services...")
-    sh(["systemctl", "restart", "haproxy"]) ; sh(["systemctl", "restart", "3proxy"], check=False)
-    # firewall (best-effort)
+    sh(["systemctl", "restart", "haproxy"]); sh(["systemctl", "restart", "3proxy"], check=False)
     try:
         port_end = port_start + pool_size - 1
         sh(["ufw", "allow", f"{port_start}:{port_end}/tcp"], check=False)
@@ -192,6 +252,92 @@ def hide():
     print("[hide] Stopping HAProxy (external ports)")
     sh(["systemctl", "stop", "haproxy"], check=False)
     print("[hide] Done.")
+
+# -------- export via CLI ----------
+@cli.command("export")
+@click.argument("fmt", type=click.Choice(["txt", "csv", "json"]))
+@click.option("--host", help="Override host for endpoints (default from config.external.host)")
+def export_cmd(fmt: str, host: Optional[str]):
+    """Экспорт списка эндпоинтов (txt/csv/json) в stdout."""
+    c = load_cfg()
+    eps = build_export_endpoints(c, host_override=host)
+    if fmt == "txt":
+        print("\n".join(eps))
+    elif fmt == "csv":
+        print("endpoint")
+        print("\n".join(eps))
+    else:
+        print(json.dumps({"endpoints": eps, "count": len(eps)}, indent=2))
+
+# -------- MAC isolation ----------
+@cli.group()
+def mac():
+    """Управление MAC-адресами (randomize/set/status/reapply/selftest)."""
+    pass
+
+@mac.command("status")
+def mac_status():
+    ifaces = list_ifaces()
+    data = {iface: read_mac(iface) for iface in ifaces}
+    print(json.dumps(data, indent=2))
+
+@mac.command("randomize")
+@click.option("--iface", "iface", help="Интерфейс (по умолчанию все)")
+@click.option("--prefix", "prefix", help="Префикс, например 02:11:22")
+def mac_randomize(iface: Optional[str], prefix: Optional[str]):
+    targets = [iface] if iface else list_ifaces()
+    for ifn in targets:
+        newm = random_mac(prefix)
+        ok = set_mac_addr(ifn, newm)
+        print(f"[mac] {ifn}: set {newm} -> {'OK' if ok else 'FAIL'}")
+
+@mac.command("set")
+@click.argument("iface")
+@click.argument("macaddr")
+def mac_set(iface: str, macaddr: str):
+    ok = set_mac_addr(iface, macaddr)
+    print(f"[mac] {iface}: set {macaddr} -> {'OK' if ok else 'FAIL'}")
+
+@mac.command("reapply")
+def mac_reapply():
+    c = load_cfg()
+    mapping = (c.get("network", {}) or {}).get("mac_persist", {}) or {}
+    if not mapping:
+        print("[mac] nothing to reapply (network.mac_persist empty)")
+        return
+    for ifn, macaddr in mapping.items():
+        ok = set_mac_addr(ifn, macaddr)
+        print(f"[mac] {ifn}: reapply {macaddr} -> {'OK' if ok else 'FAIL'}")
+
+@mac.command("selftest")
+def mac_selftest():
+    r = sh(["which", "ip"], check=False)
+    print("[mac] ip tool:", "OK" if r.returncode == 0 else "MISSING")
+    print("[mac] ifaces:", ", ".join(list_ifaces()))
+
+# -------- Uplink/SNAT (skeleton) ----------
+@click.group()
+def uplink():
+    """Multi-uplink/SNAT (скелет команд add/del/list)."""
+    pass
+
+@uplink.command("list")
+def uplink_list():
+    r = sh(["ip", "route", "show"], check=False)
+    print(r.stdout or r.stderr)
+
+@uplink.command("add")
+@click.argument("name")
+@click.option("--dev", required=True, help="Интерфейс, например eth1")
+@click.option("--gw", required=True, help="Шлюз, например 192.0.2.1")
+@click.option("--metric", default=100, type=int)
+def uplink_add(name: str, dev: str, gw: str, metric: int):
+    print(f"[uplink] add name={name} dev={dev} gw={gw} metric={metric} (placeholder)")
+
+@uplink.command("del")
+@click.argument("name")
+def uplink_del(name: str):
+    print(f"[uplink] del name={name} (placeholder)")
 
 if __name__ == "__main__":
     cli()
