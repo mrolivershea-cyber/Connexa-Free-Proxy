@@ -1,105 +1,202 @@
-Last login: Mon Nov  3 00:38:21 on ttys000
-exchange@Mysteriouss-Air ~ % ssh root@195.26.255.18
-root@195.26.255.18's password: 
-Welcome to Ubuntu 22.04.5 LTS (GNU/Linux 5.15.0-160-generic x86_64)
-
- * Documentation:  https://help.ubuntu.com
- * Management:     https://landscape.canonical.com
- * Support:        https://ubuntu.com/pro
-
- System information as of Sun Nov  2 18:51:06 CET 2025
-
-  System load:           0.05
-  Usage of /:            1.2% of 387.48GB
-  Memory usage:          15%
-  Swap usage:            0%
-  Processes:             210
-  Users logged in:       0
-  IPv4 address for eth0: 195.26.255.18
-  IPv6 address for eth0: 2605:a140:2288:1987::1
-
-
-Expanded Security Maintenance for Applications is not enabled.
-
-0 updates can be applied immediately.
-
-Enable ESM Apps to receive additional future security updates.
-See https://ubuntu.com/esm or run: sudo pro status
-
-New release '24.04.3 LTS' available.
-Run 'do-release-upgrade' to upgrade to it.
-
-
-*** System restart required ***
-  _____
- / ___/___  _  _ _____ _   ___  ___
-| |   / _ \| \| |_   _/ \ | _ )/ _ \
-| |__| (_) | .` | | |/ _ \| _ \ (_) |
- \____\___/|_|\_| |_/_/ \_|___/\___/
-
-Welcome!
-
-This server is hosted by Contabo. If you have any questions or need help,
-please don't hesitate to contact us at support@contabo.com.
-
-Last login: Sun Nov  2 18:38:41 2025 from 113.189.109.248
-root@vmi2881987:~# curl -fsSL https://raw.githubusercontent.com/mrolivershea-cyber/Connexa-Free-Proxy/main/scripts/install.sh | sudo bash
-sudo systemctl restart connexa-api
-Hit:1 http://archive.ubuntu.com/ubuntu jammy InRelease
-Hit:2 http://archive.ubuntu.com/ubuntu jammy-updates InRelease
-Hit:3 http://security.ubuntu.com/ubuntu jammy-security InRelease
-Hit:4 http://archive.ubuntu.com/ubuntu jammy-backports InRelease
-Reading package lists... Done
-Reading package lists... Done
-Building dependency tree... Done
-Reading state information... Done
-build-essential is already the newest version (12.9ubuntu3).
-gcc is already the newest version (4:11.2.0-1ubuntu1).
-make is already the newest version (4.3-4.1build1).
-tor is already the newest version (0.4.6.10-1).
-ca-certificates is already the newest version (20240203~22.04.1).
-curl is already the newest version (7.81.0-1ubuntu1.21).
-git is already the newest version (1:2.34.1-1ubuntu1.15).
-haproxy is already the newest version (2.4.24-0ubuntu0.22.04.3).
-jq is already the newest version (1.6-2.1ubuntu3.1).
-openssl is already the newest version (3.0.2-0ubuntu1.20).
-ufw is already the newest version (0.36.1-4ubuntu0.1).
-wget is already the newest version (1.21.2-2ubuntu1.1).
-python3-pip is already the newest version (22.0.2+dfsg-1ubuntu0.7).
-0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
-Reading package lists... Done
-Building dependency tree... Done
-Reading state information... Done
-E: Unable to locate package 3proxy
-remote: Enumerating objects: 11, done.
-remote: Counting objects: 100% (11/11), done.
-remote: Compressing objects: 100% (7/7), done.
-remote: Total 7 (delta 5), reused 0 (delta 0), pack-reused 0 (from 0)
-Unpacking objects: 100% (7/7), 2.99 KiB | 765.00 KiB/s, done.
-From https://github.com/mrolivershea-cyber/Connexa-Free-Proxy
-   a4906e6..c323283  main       -> origin/main
-Updating 05aa119..c323283
-error: Your local changes to the following files would be overwritten by merge:
-	api/server.py
-Please commit your changes or stash them before you merge.
-Aborting
-root@vmi2881987:~# sudo systemctl status connexa-api 
-● connexa-api.service - Connexa Free Proxy API
-     Loaded: loaded (/etc/systemd/system/connexa-api.service; enabled; vendor p>
-     Active: active (running) since Sun 2025-11-02 18:51:28 CET; 41s ago
-   Main PID: 92585 (python3)
-      Tasks: 6 (limit: 28785)
-     Memory: 31.8M
-        CPU: 680ms
-     CGroup: /system.slice/connexa-api.service
-             └─92585 /usr/bin/python3 -m uvicorn api.server:app --host 0.0.0.0 >
-
-Nov 02 18:51:28 vmi2881987 systemd[1]: Started Connexa Free Proxy API.
-Nov 02 18:51:28 vmi2881987 python3[92585]: INFO:     Started server process [92>
-Nov 02 18:51:28 vmi2881987 python3[92585]: INFO:     Waiting for application st>
-Nov 02 18:51:28 vmi2881987 python3[92585]: INFO:     Application startup comple>
-Nov 02 18:51:28 vmi2881987 python3[92585]: INFO:     Uvicorn running on http://>
-Nov 02 18:51:38 vmi2881987 python3[92585]: INFO:     104.28.68.158:44753 - "GET>
-Nov 02 18:51:49 vmi2881987 python3[92585]: INFO:     104.28.68.162:30975 - "GET>
-Nov 02 18:51:49 vmi2881987 python3[92585]: INFO:     104.28.68.162:30940 - "GET>
-lines 1-18/18 (END)
+root@vmi2881987:~# journalctl -u connexa-api -n 200 --no-pager
+Nov 02 19:41:06 vmi2881987 python3[101767]: INFO:     104.28.71.158:41852 - "POST /admin/first-run HTTP/1.1" 500 Internal Server Error
+Nov 02 19:41:06 vmi2881987 python3[101767]: ERROR:    Exception in ASGI application
+Nov 02 19:41:06 vmi2881987 python3[101767]: Traceback (most recent call last):
+Nov 02 19:41:06 vmi2881987 python3[101767]:   File "/usr/local/lib/python3.10/dist-packages/uvicorn/protocols/http/httptools_impl.py", line 409, in run_asgi
+Nov 02 19:41:06 vmi2881987 python3[101767]:     result = await app(  # type: ignore[func-returns-value]
+Nov 02 19:41:06 vmi2881987 python3[101767]:   File "/usr/local/lib/python3.10/dist-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+Nov 02 19:41:06 vmi2881987 python3[101767]:     return await self.app(scope, receive, send)
+Nov 02 19:41:06 vmi2881987 python3[101767]:   File "/usr/local/lib/python3.10/dist-packages/fastapi/applications.py", line 1134, in __call__
+Nov 02 19:41:06 vmi2881987 python3[101767]:     await super().__call__(scope, receive, send)
+Nov 02 19:41:06 vmi2881987 python3[101767]:   File "/usr/local/lib/python3.10/dist-packages/starlette/applications.py", line 113, in __call__
+Nov 02 19:41:06 vmi2881987 python3[101767]:     await self.middleware_stack(scope, receive, send)
+Nov 02 19:41:06 vmi2881987 python3[101767]:   File "/usr/local/lib/python3.10/dist-packages/starlette/middleware/errors.py", line 186, in __call__
+Nov 02 19:41:06 vmi2881987 python3[101767]:     raise exc
+Nov 02 19:41:06 vmi2881987 python3[101767]:   File "/usr/local/lib/python3.10/dist-packages/starlette/middleware/errors.py", line 164, in __call__
+Nov 02 19:41:06 vmi2881987 python3[101767]:     await self.app(scope, receive, _send)
+Nov 02 19:41:06 vmi2881987 python3[101767]:   File "/usr/local/lib/python3.10/dist-packages/starlette/middleware/exceptions.py", line 63, in __call__
+Nov 02 19:41:06 vmi2881987 python3[101767]:     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+Nov 02 19:41:06 vmi2881987 python3[101767]:   File "/usr/local/lib/python3.10/dist-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+Nov 02 19:41:06 vmi2881987 python3[101767]:     raise exc
+Nov 02 19:41:06 vmi2881987 python3[101767]:   File "/usr/local/lib/python3.10/dist-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+Nov 02 19:41:06 vmi2881987 python3[101767]:     await app(scope, receive, sender)
+Nov 02 19:41:06 vmi2881987 python3[101767]:   File "/usr/local/lib/python3.10/dist-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+Nov 02 19:41:06 vmi2881987 python3[101767]:     await self.app(scope, receive, send)
+Nov 02 19:41:06 vmi2881987 python3[101767]:   File "/usr/local/lib/python3.10/dist-packages/starlette/routing.py", line 716, in __call__
+Nov 02 19:41:06 vmi2881987 python3[101767]:     await self.middleware_stack(scope, receive, send)
+Nov 02 19:41:06 vmi2881987 python3[101767]:   File "/usr/local/lib/python3.10/dist-packages/starlette/routing.py", line 736, in app
+Nov 02 19:41:06 vmi2881987 python3[101767]:     await route.handle(scope, receive, send)
+Nov 02 19:41:06 vmi2881987 python3[101767]:   File "/usr/local/lib/python3.10/dist-packages/starlette/routing.py", line 290, in handle
+Nov 02 19:41:06 vmi2881987 python3[101767]:     await self.app(scope, receive, send)
+Nov 02 19:41:06 vmi2881987 python3[101767]:   File "/usr/local/lib/python3.10/dist-packages/fastapi/routing.py", line 124, in app
+Nov 02 19:41:06 vmi2881987 python3[101767]:     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+Nov 02 19:41:06 vmi2881987 python3[101767]:   File "/usr/local/lib/python3.10/dist-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+Nov 02 19:41:06 vmi2881987 python3[101767]:     raise exc
+Nov 02 19:41:06 vmi2881987 python3[101767]:   File "/usr/local/lib/python3.10/dist-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+Nov 02 19:41:06 vmi2881987 python3[101767]:     await app(scope, receive, sender)
+Nov 02 19:41:06 vmi2881987 python3[101767]:   File "/usr/local/lib/python3.10/dist-packages/fastapi/routing.py", line 110, in app
+Nov 02 19:41:06 vmi2881987 python3[101767]:     response = await f(request)
+Nov 02 19:41:06 vmi2881987 python3[101767]:   File "/usr/local/lib/python3.10/dist-packages/fastapi/routing.py", line 390, in app
+Nov 02 19:41:06 vmi2881987 python3[101767]:     raw_response = await run_endpoint_function(
+Nov 02 19:41:06 vmi2881987 python3[101767]:   File "/usr/local/lib/python3.10/dist-packages/fastapi/routing.py", line 289, in run_endpoint_function
+Nov 02 19:41:06 vmi2881987 python3[101767]:     return await dependant.call(**values)
+Nov 02 19:41:06 vmi2881987 python3[101767]:   File "/opt/Connexa-Free-Proxy/api/admin.py", line 126, in first_run_post
+Nov 02 19:41:06 vmi2881987 python3[101767]:     form = await request.form()
+Nov 02 19:41:06 vmi2881987 python3[101767]:   File "/usr/local/lib/python3.10/dist-packages/starlette/requests.py", line 262, in _get_form
+Nov 02 19:41:06 vmi2881987 python3[101767]:     assert parse_options_header is not None, (
+Nov 02 19:41:06 vmi2881987 python3[101767]: AssertionError: The `python-multipart` library must be installed to use form parsing.
+Nov 02 19:41:11 vmi2881987 python3[101767]: INFO:     104.28.71.158:41873 - "GET /admin HTTP/1.1" 302 Found
+Nov 02 19:41:11 vmi2881987 python3[101767]: INFO:     104.28.71.158:41873 - "GET /admin/first-run HTTP/1.1" 200 OK
+Nov 02 19:42:50 vmi2881987 python3[101767]: INFO:     104.28.71.158:41645 - "GET /admin/first-run HTTP/1.1" 200 OK
+Nov 02 19:42:52 vmi2881987 python3[101767]: INFO:     104.28.71.158:41645 - "GET /admin/first-run HTTP/1.1" 200 OK
+Nov 02 19:42:58 vmi2881987 systemd[1]: Stopping Connexa Free Proxy API...
+Nov 02 19:42:58 vmi2881987 python3[101767]: INFO:     Shutting down
+Nov 02 19:42:58 vmi2881987 python3[101767]: INFO:     Waiting for application shutdown.
+Nov 02 19:42:58 vmi2881987 python3[101767]: INFO:     Application shutdown complete.
+Nov 02 19:42:58 vmi2881987 python3[101767]: INFO:     Finished server process [101767]
+Nov 02 19:42:58 vmi2881987 systemd[1]: connexa-api.service: Deactivated successfully.
+Nov 02 19:42:58 vmi2881987 systemd[1]: Stopped Connexa Free Proxy API.
+Nov 02 19:42:58 vmi2881987 systemd[1]: connexa-api.service: Consumed 1.343s CPU time.
+Nov 02 19:42:58 vmi2881987 systemd[1]: Started Connexa Free Proxy API.
+Nov 02 19:42:58 vmi2881987 systemd[1]: Stopping Connexa Free Proxy API...
+Nov 02 19:42:58 vmi2881987 systemd[1]: connexa-api.service: Deactivated successfully.
+Nov 02 19:42:58 vmi2881987 systemd[1]: Stopped Connexa Free Proxy API.
+Nov 02 19:42:58 vmi2881987 systemd[1]: Started Connexa Free Proxy API.
+Nov 02 19:42:59 vmi2881987 python3[104407]: INFO:     Started server process [104407]
+Nov 02 19:42:59 vmi2881987 python3[104407]: INFO:     Waiting for application startup.
+Nov 02 19:42:59 vmi2881987 python3[104407]: INFO:     Application startup complete.
+Nov 02 19:42:59 vmi2881987 python3[104407]: INFO:     Uvicorn running on http://0.0.0.0:8080 (Press CTRL+C to quit)
+Nov 02 19:43:05 vmi2881987 python3[104407]: INFO:     104.28.71.158:41617 - "GET /apple-touch-icon.png HTTP/1.1" 404 Not Found
+Nov 02 19:43:05 vmi2881987 python3[104407]: INFO:     104.28.71.158:41534 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+Nov 02 19:43:05 vmi2881987 python3[104407]: INFO:     104.28.71.158:41649 - "GET /apple-touch-icon-precomposed.png HTTP/1.1" 404 Not Found
+Nov 02 19:43:07 vmi2881987 python3[104407]: INFO:     104.28.68.168:28858 - "GET /admin/first-run HTTP/1.1" 200 OK
+Nov 02 19:43:20 vmi2881987 python3[104407]: INFO:     104.28.68.168:28995 - "POST /admin/first-run HTTP/1.1" 500 Internal Server Error
+Nov 02 19:43:20 vmi2881987 python3[104407]: ERROR:    Exception in ASGI application
+Nov 02 19:43:20 vmi2881987 python3[104407]: Traceback (most recent call last):
+Nov 02 19:43:20 vmi2881987 python3[104407]:   File "/usr/local/lib/python3.10/dist-packages/uvicorn/protocols/http/httptools_impl.py", line 409, in run_asgi
+Nov 02 19:43:20 vmi2881987 python3[104407]:     result = await app(  # type: ignore[func-returns-value]
+Nov 02 19:43:20 vmi2881987 python3[104407]:   File "/usr/local/lib/python3.10/dist-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+Nov 02 19:43:20 vmi2881987 python3[104407]:     return await self.app(scope, receive, send)
+Nov 02 19:43:20 vmi2881987 python3[104407]:   File "/usr/local/lib/python3.10/dist-packages/fastapi/applications.py", line 1134, in __call__
+Nov 02 19:43:20 vmi2881987 python3[104407]:     await super().__call__(scope, receive, send)
+Nov 02 19:43:20 vmi2881987 python3[104407]:   File "/usr/local/lib/python3.10/dist-packages/starlette/applications.py", line 113, in __call__
+Nov 02 19:43:20 vmi2881987 python3[104407]:     await self.middleware_stack(scope, receive, send)
+Nov 02 19:43:20 vmi2881987 python3[104407]:   File "/usr/local/lib/python3.10/dist-packages/starlette/middleware/errors.py", line 186, in __call__
+Nov 02 19:43:20 vmi2881987 python3[104407]:     raise exc
+Nov 02 19:43:20 vmi2881987 python3[104407]:   File "/usr/local/lib/python3.10/dist-packages/starlette/middleware/errors.py", line 164, in __call__
+Nov 02 19:43:20 vmi2881987 python3[104407]:     await self.app(scope, receive, _send)
+Nov 02 19:43:20 vmi2881987 python3[104407]:   File "/usr/local/lib/python3.10/dist-packages/starlette/middleware/exceptions.py", line 63, in __call__
+Nov 02 19:43:20 vmi2881987 python3[104407]:     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+Nov 02 19:43:20 vmi2881987 python3[104407]:   File "/usr/local/lib/python3.10/dist-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+Nov 02 19:43:20 vmi2881987 python3[104407]:     raise exc
+Nov 02 19:43:20 vmi2881987 python3[104407]:   File "/usr/local/lib/python3.10/dist-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+Nov 02 19:43:20 vmi2881987 python3[104407]:     await app(scope, receive, sender)
+Nov 02 19:43:20 vmi2881987 python3[104407]:   File "/usr/local/lib/python3.10/dist-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+Nov 02 19:43:20 vmi2881987 python3[104407]:     await self.app(scope, receive, send)
+Nov 02 19:43:20 vmi2881987 python3[104407]:   File "/usr/local/lib/python3.10/dist-packages/starlette/routing.py", line 716, in __call__
+Nov 02 19:43:20 vmi2881987 python3[104407]:     await self.middleware_stack(scope, receive, send)
+Nov 02 19:43:20 vmi2881987 python3[104407]:   File "/usr/local/lib/python3.10/dist-packages/starlette/routing.py", line 736, in app
+Nov 02 19:43:20 vmi2881987 python3[104407]:     await route.handle(scope, receive, send)
+Nov 02 19:43:20 vmi2881987 python3[104407]:   File "/usr/local/lib/python3.10/dist-packages/starlette/routing.py", line 290, in handle
+Nov 02 19:43:20 vmi2881987 python3[104407]:     await self.app(scope, receive, send)
+Nov 02 19:43:20 vmi2881987 python3[104407]:   File "/usr/local/lib/python3.10/dist-packages/fastapi/routing.py", line 124, in app
+Nov 02 19:43:20 vmi2881987 python3[104407]:     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+Nov 02 19:43:20 vmi2881987 python3[104407]:   File "/usr/local/lib/python3.10/dist-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+Nov 02 19:43:20 vmi2881987 python3[104407]:     raise exc
+Nov 02 19:43:20 vmi2881987 python3[104407]:   File "/usr/local/lib/python3.10/dist-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+Nov 02 19:43:20 vmi2881987 python3[104407]:     await app(scope, receive, sender)
+Nov 02 19:43:20 vmi2881987 python3[104407]:   File "/usr/local/lib/python3.10/dist-packages/fastapi/routing.py", line 110, in app
+Nov 02 19:43:20 vmi2881987 python3[104407]:     response = await f(request)
+Nov 02 19:43:20 vmi2881987 python3[104407]:   File "/usr/local/lib/python3.10/dist-packages/fastapi/routing.py", line 390, in app
+Nov 02 19:43:20 vmi2881987 python3[104407]:     raw_response = await run_endpoint_function(
+Nov 02 19:43:20 vmi2881987 python3[104407]:   File "/usr/local/lib/python3.10/dist-packages/fastapi/routing.py", line 289, in run_endpoint_function
+Nov 02 19:43:20 vmi2881987 python3[104407]:     return await dependant.call(**values)
+Nov 02 19:43:20 vmi2881987 python3[104407]:   File "/opt/Connexa-Free-Proxy/api/admin.py", line 126, in first_run_post
+Nov 02 19:43:20 vmi2881987 python3[104407]:     form = await request.form()
+Nov 02 19:43:20 vmi2881987 python3[104407]:   File "/usr/local/lib/python3.10/dist-packages/starlette/requests.py", line 262, in _get_form
+Nov 02 19:43:20 vmi2881987 python3[104407]:     assert parse_options_header is not None, (
+Nov 02 19:43:20 vmi2881987 python3[104407]: AssertionError: The `python-multipart` library must be installed to use form parsing.
+Nov 02 19:47:47 vmi2881987 python3[104407]: INFO:     204.76.203.219:49464 - "GET / HTTP/1.1" 404 Not Found
+Nov 02 20:02:19 vmi2881987 systemd[1]: Stopping Connexa Free Proxy API...
+Nov 02 20:02:19 vmi2881987 python3[104407]: INFO:     Shutting down
+Nov 02 20:02:20 vmi2881987 python3[104407]: INFO:     Waiting for application shutdown.
+Nov 02 20:02:20 vmi2881987 python3[104407]: INFO:     Application shutdown complete.
+Nov 02 20:02:20 vmi2881987 python3[104407]: INFO:     Finished server process [104407]
+Nov 02 20:02:20 vmi2881987 systemd[1]: connexa-api.service: Deactivated successfully.
+Nov 02 20:02:20 vmi2881987 systemd[1]: Stopped Connexa Free Proxy API.
+Nov 02 20:02:20 vmi2881987 systemd[1]: connexa-api.service: Consumed 3.762s CPU time.
+Nov 02 20:02:29 vmi2881987 systemd[1]: Started Connexa Free Proxy API.
+Nov 02 20:02:30 vmi2881987 python3[105684]: INFO:     Started server process [105684]
+Nov 02 20:02:30 vmi2881987 python3[105684]: INFO:     Waiting for application startup.
+Nov 02 20:02:30 vmi2881987 python3[105684]: INFO:     Application startup complete.
+Nov 02 20:02:30 vmi2881987 python3[105684]: INFO:     Uvicorn running on http://0.0.0.0:8080 (Press CTRL+C to quit)
+Nov 02 20:03:18 vmi2881987 systemd[1]: Stopping Connexa Free Proxy API...
+Nov 02 20:03:18 vmi2881987 python3[105684]: INFO:     Shutting down
+Nov 02 20:03:18 vmi2881987 python3[105684]: INFO:     Waiting for application shutdown.
+Nov 02 20:03:18 vmi2881987 python3[105684]: INFO:     Application shutdown complete.
+Nov 02 20:03:18 vmi2881987 python3[105684]: INFO:     Finished server process [105684]
+Nov 02 20:03:18 vmi2881987 systemd[1]: connexa-api.service: Deactivated successfully.
+Nov 02 20:03:18 vmi2881987 systemd[1]: Stopped Connexa Free Proxy API.
+Nov 02 20:03:18 vmi2881987 systemd[1]: Started Connexa Free Proxy API.
+Nov 02 20:03:18 vmi2881987 systemd[1]: Stopping Connexa Free Proxy API...
+Nov 02 20:03:18 vmi2881987 systemd[1]: connexa-api.service: Deactivated successfully.
+Nov 02 20:03:18 vmi2881987 systemd[1]: Stopped Connexa Free Proxy API.
+Nov 02 20:03:18 vmi2881987 systemd[1]: Started Connexa Free Proxy API.
+Nov 02 20:03:19 vmi2881987 python3[107749]: INFO:     Started server process [107749]
+Nov 02 20:03:19 vmi2881987 python3[107749]: INFO:     Waiting for application startup.
+Nov 02 20:03:19 vmi2881987 python3[107749]: INFO:     Application startup complete.
+Nov 02 20:03:19 vmi2881987 python3[107749]: INFO:     Uvicorn running on http://0.0.0.0:8080 (Press CTRL+C to quit)
+Nov 02 20:03:19 vmi2881987 python3[107749]: INFO:     127.0.0.1:54424 - "GET /admin HTTP/1.1" 302 Found
+Nov 02 20:03:23 vmi2881987 python3[107749]: INFO:     104.28.71.158:46546 - "GET /admin/first-run HTTP/1.1" 200 OK
+Nov 02 20:07:38 vmi2881987 python3[107749]: INFO:     104.28.71.158:41621 - "GET /apple-touch-icon-precomposed.png HTTP/1.1" 404 Not Found
+Nov 02 20:07:38 vmi2881987 python3[107749]: INFO:     104.28.71.158:41587 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+Nov 02 20:07:38 vmi2881987 python3[107749]: INFO:     104.28.71.158:41644 - "GET /apple-touch-icon.png HTTP/1.1" 404 Not Found
+Nov 02 20:07:40 vmi2881987 python3[107749]: INFO:     104.28.68.170:24286 - "GET /admin/first-run HTTP/1.1" 200 OK
+Nov 02 20:07:46 vmi2881987 python3[107749]: INFO:     104.28.68.170:24409 - "POST /admin/first-run HTTP/1.1" 500 Internal Server Error
+Nov 02 20:07:46 vmi2881987 python3[107749]: ERROR:    Exception in ASGI application
+Nov 02 20:07:46 vmi2881987 python3[107749]: Traceback (most recent call last):
+Nov 02 20:07:46 vmi2881987 python3[107749]:   File "/usr/local/lib/python3.10/dist-packages/uvicorn/protocols/http/httptools_impl.py", line 409, in run_asgi
+Nov 02 20:07:46 vmi2881987 python3[107749]:     result = await app(  # type: ignore[func-returns-value]
+Nov 02 20:07:46 vmi2881987 python3[107749]:   File "/usr/local/lib/python3.10/dist-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+Nov 02 20:07:46 vmi2881987 python3[107749]:     return await self.app(scope, receive, send)
+Nov 02 20:07:46 vmi2881987 python3[107749]:   File "/usr/local/lib/python3.10/dist-packages/fastapi/applications.py", line 1134, in __call__
+Nov 02 20:07:46 vmi2881987 python3[107749]:     await super().__call__(scope, receive, send)
+Nov 02 20:07:46 vmi2881987 python3[107749]:   File "/usr/local/lib/python3.10/dist-packages/starlette/applications.py", line 113, in __call__
+Nov 02 20:07:46 vmi2881987 python3[107749]:     await self.middleware_stack(scope, receive, send)
+Nov 02 20:07:46 vmi2881987 python3[107749]:   File "/usr/local/lib/python3.10/dist-packages/starlette/middleware/errors.py", line 186, in __call__
+Nov 02 20:07:46 vmi2881987 python3[107749]:     raise exc
+Nov 02 20:07:46 vmi2881987 python3[107749]:   File "/usr/local/lib/python3.10/dist-packages/starlette/middleware/errors.py", line 164, in __call__
+Nov 02 20:07:46 vmi2881987 python3[107749]:     await self.app(scope, receive, _send)
+Nov 02 20:07:46 vmi2881987 python3[107749]:   File "/usr/local/lib/python3.10/dist-packages/starlette/middleware/exceptions.py", line 63, in __call__
+Nov 02 20:07:46 vmi2881987 python3[107749]:     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+Nov 02 20:07:46 vmi2881987 python3[107749]:   File "/usr/local/lib/python3.10/dist-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+Nov 02 20:07:46 vmi2881987 python3[107749]:     raise exc
+Nov 02 20:07:46 vmi2881987 python3[107749]:   File "/usr/local/lib/python3.10/dist-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+Nov 02 20:07:46 vmi2881987 python3[107749]:     await app(scope, receive, sender)
+Nov 02 20:07:46 vmi2881987 python3[107749]:   File "/usr/local/lib/python3.10/dist-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+Nov 02 20:07:46 vmi2881987 python3[107749]:     await self.app(scope, receive, send)
+Nov 02 20:07:46 vmi2881987 python3[107749]:   File "/usr/local/lib/python3.10/dist-packages/starlette/routing.py", line 716, in __call__
+Nov 02 20:07:46 vmi2881987 python3[107749]:     await self.middleware_stack(scope, receive, send)
+Nov 02 20:07:46 vmi2881987 python3[107749]:   File "/usr/local/lib/python3.10/dist-packages/starlette/routing.py", line 736, in app
+Nov 02 20:07:46 vmi2881987 python3[107749]:     await route.handle(scope, receive, send)
+Nov 02 20:07:46 vmi2881987 python3[107749]:   File "/usr/local/lib/python3.10/dist-packages/starlette/routing.py", line 290, in handle
+Nov 02 20:07:46 vmi2881987 python3[107749]:     await self.app(scope, receive, send)
+Nov 02 20:07:46 vmi2881987 python3[107749]:   File "/usr/local/lib/python3.10/dist-packages/fastapi/routing.py", line 124, in app
+Nov 02 20:07:46 vmi2881987 python3[107749]:     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+Nov 02 20:07:46 vmi2881987 python3[107749]:   File "/usr/local/lib/python3.10/dist-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+Nov 02 20:07:46 vmi2881987 python3[107749]:     raise exc
+Nov 02 20:07:46 vmi2881987 python3[107749]:   File "/usr/local/lib/python3.10/dist-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+Nov 02 20:07:46 vmi2881987 python3[107749]:     await app(scope, receive, sender)
+Nov 02 20:07:46 vmi2881987 python3[107749]:   File "/usr/local/lib/python3.10/dist-packages/fastapi/routing.py", line 110, in app
+Nov 02 20:07:46 vmi2881987 python3[107749]:     response = await f(request)
+Nov 02 20:07:46 vmi2881987 python3[107749]:   File "/usr/local/lib/python3.10/dist-packages/fastapi/routing.py", line 390, in app
+Nov 02 20:07:46 vmi2881987 python3[107749]:     raw_response = await run_endpoint_function(
+Nov 02 20:07:46 vmi2881987 python3[107749]:   File "/usr/local/lib/python3.10/dist-packages/fastapi/routing.py", line 289, in run_endpoint_function
+Nov 02 20:07:46 vmi2881987 python3[107749]:     return await dependant.call(**values)
+Nov 02 20:07:46 vmi2881987 python3[107749]:   File "/opt/Connexa-Free-Proxy/api/admin.py", line 126, in first_run_post
+Nov 02 20:07:46 vmi2881987 python3[107749]:     form = await request.form()
+Nov 02 20:07:46 vmi2881987 python3[107749]:   File "/usr/local/lib/python3.10/dist-packages/starlette/requests.py", line 262, in _get_form
+Nov 02 20:07:46 vmi2881987 python3[107749]:     assert parse_options_header is not None, (
+Nov 02 20:07:46 vmi2881987 python3[107749]: AssertionError: The `python-multipart` library must be installed to use form parsing.
+Nov 02 20:07:49 vmi2881987 python3[107749]: INFO:     176.65.148.246:37494 - "GET / HTTP/1.1" 404 Not Found
+root@vmi2881987:~# 
