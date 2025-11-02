@@ -23,9 +23,7 @@ require_root() {
 pkg_install() {
   export DEBIAN_FRONTEND=noninteractive
   apt-get update
-  # base deps
   apt-get install -y git python3-pip haproxy tor jq ufw curl ca-certificates openssl build-essential make gcc wget || true
-  # try 3proxy via apt (may be absent)
   apt-get install -y 3proxy || true
 }
 
@@ -101,6 +99,14 @@ else:
 PY
 }
 
+ensure_admin_default() {
+  if [[ ! -f "$ADMIN_CREDS_FILE" ]]; then
+    echo "admin:admin" > "$ADMIN_CREDS_FILE"
+    chmod 600 "$ADMIN_CREDS_FILE"
+    echo "[admin] default stats login set to admin/admin (stats bound to localhost until changed in /admin)"
+  fi
+}
+
 install_cli_and_scripts() {
   install -m 0755 "$APP_DIR/cli/poolproxyctl.py" /usr/local/bin/poolproxyctl
   install -m 0755 "$APP_DIR/scripts/watchdog.sh" /usr/local/bin/connexa-watchdog || true
@@ -121,16 +127,6 @@ echo "[rotation] done."
 SH
     chmod +x /usr/local/bin/connexa-rotation
   fi
-  if [[ -f "$APP_DIR/scripts/tls-fallback.sh" ]]; then
-    install -m 0755 "$APP_DIR/scripts/tls-fallback.sh" /usr/local/bin/connexa-tls-fallback
-  else
-    printf '#!/usr/bin/env bash\nexit 0\n' > /usr/local/bin/connexa-tls-fallback && chmod +x /usr/local/bin/connexa-tls-fallback
-  fi
-  if [[ -f "$APP_DIR/scripts/guardrails.sh" ]]; then
-    install -m 0755 "$APP_DIR/scripts/guardrails.sh" /usr/local/bin/connexa-guardrails
-  else
-    printf '#!/usr/bin/env bash\nexit 0\n' > /usr/local/bin/connexa-guardrails && chmod +x /usr/local/bin/connexa-guardrails
-  fi
 }
 
 write_tor_pool_unit() {
@@ -139,101 +135,120 @@ write_tor_pool_unit() {
 Description=Tor pool node %i
 After=network-online.target
 Wants=network-online.target
-
 [Service]
 User=debian-tor
 Group=debian-tor
 ExecStart=/usr/bin/tor -f /etc/tor/pool/torrc-%i
 Restart=always
 RestartSec=3
-
 [Install]
 WantedBy=multi-user.target
 UNIT
 }
 
+patch_server_py() {
+  local f="$APP_DIR/api/server.py"
+  # Fix accidental trailing dot
+  if [[ -f "$f" ]] && grep -qE 'uvicorn\.run\(.*\)\.[[:space:]]*$' "$f"; then
+    sed -i -E 's/(uvicorn\.run\(.*\))\.[[:space:]]*$/\1/' "$f"
+    echo "[patch] Fixed trailing dot in api/server.py"
+  fi
+}
+
+ensure_admin_router_present() {
+  # Ensure admin router exists
+  if [[ ! -f "$APP_DIR/api/admin.py" ]]; then
+    install -d "$APP_DIR/api"
+    cat >"$APP_DIR/api/admin.py" <<'PY'
+from fastapi import APIRouter, Depends, Request, HTTPException, status
+from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
+from pathlib import Path
+import subprocess
+
+router = APIRouter(tags=["admin"])
+security = HTTPBasic()
+
+ADMIN_FILE = Path("/etc/connexa/haproxy-admin")
+HAPROXY_CFG = Path("/etc/haproxy/haproxy.cfg")
+STATS_PORT = 8081
+
+def read_creds() -> tuple[str, str]:
+    if ADMIN_FILE.exists():
+        try:
+            user, pwd = ADMIN_FILE.read_text().strip().split(":", 1)
+            return user, pwd
+        except Exception:
+            pass
+    return "admin", "admin"
+
+def write_creds(user: str, pwd: str):
+    ADMIN_FILE.parent.mkdir(parents=True, exist_ok=True)
+    ADMIN_FILE.write_text(f"{user}:{pwd}")
+    ADMIN_FILE.chmod(0o600)
+
+def require_auth(creds: HTTPBasicCredentials = Depends(security)) -> tuple[str, str]:
+    u, p = read_creds()
+    if creds.username != u or creds.password != p:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Unauthorized",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+    return u, p
+
+def enable_stats_external(user: str, pwd: str):
+    if HAPROXY_CFG.exists():
+        content = HAPROXY_CFG.read_text()
+        lines = []
+        for line in content.splitlines():
+            s = line.strip()
+            if s.startswith("stats auth "):
+                line = f"    stats auth {user}:{pwd}"
+            if s.startswith("bind ") and f":{STATS_PORT}" in s:
+                line = f"    bind 0.0.0.0:{STATS_PORT}"
+            lines.append(line)
+        HAPROXY_CFG.write_text("\n".join(lines) + "\n")
+    subprocess.run(["bash", "-lc", "command -v ufw >/dev/null 2>&1 && ufw allow 8081/tcp || true"], check=False)
+    subprocess.run(["systemctl", "restart", "haproxy"], check=False)
+
+def html_page(body: str) -> HTMLResponse:
+    return HTMLResponse(f"<!doctype html><html><body>{body}</body></html>")
+
+@router.get("/admin")
+def admin_home(userpwd=Depends(require_auth)):
+    u, p = userpwd
+    if u == "admin" and p == "admin":
+        return RedirectResponse(url="/admin/change", status_code=302)
+    return html_page("OK")
+
+@router.get("/admin/change")
+def admin_change_get(userpwd=Depends(require_auth)):
+    return html_page('<form method="POST" action="/admin/change"><input type="password" name="new_password" minlength="6" required><button type="submit">OK</button></form>')
+
+@router.post("/admin/change")
+async def admin_change_post(request: Request, userpwd=Depends(require_auth)):
+    form = await request.form()
+    new_password = (form.get("new_password") or "").strip()
+    if len(new_password) < 6:
+        return html_page("bad password")
+    write_creds("admin", new_password)
+    enable_stats_external("admin", new_password)
+    return html_page("done")
+PY
+    echo "[admin] fallback admin router installed"
+  fi
+  # Ensure server imports admin router
+  if ! grep -q "from api.admin import router as admin_router" "$APP_DIR/api/server.py"; then
+    sed -i '1i from api.admin import router as admin_router' "$APP_DIR/api/server.py"
+  fi
+  if ! grep -q "app.include_router(admin_router)" "$APP_DIR/api/server.py"; then
+    sed -i '/app\.include_router(ops_router)/a app.include_router(admin_router)' "$APP_DIR/api/server.py"
+  fi
+}
+
 install_systemd_units() {
-  cat >/etc/systemd/system/connexa-rotation.service <<'UNIT'
-[Unit]
-Description=Connexa rotation job (Tor pool soft rotation)
-[Service]
-Type=oneshot
-ExecStart=/usr/local/bin/connexa-rotation
-UNIT
-  cat >/etc/systemd/system/connexa-rotation.timer <<'UNIT'
-[Unit]
-Description=Connexa rotation timer
-[Timer]
-OnUnitActiveSec=5m
-Persistent=true
-Unit=connexa-rotation.service
-[Install]
-WantedBy=timers.target
-UNIT
-
-  cat >/etc/systemd/system/connexa-watchdog.service <<'UNIT'
-[Unit]
-Description=Connexa watchdog (haproxy/3proxy)
-[Service]
-Type=oneshot
-ExecStart=/usr/local/bin/connexa-watchdog
-UNIT
-  cat >/etc/systemd/system/connexa-watchdog.timer <<'UNIT'
-[Unit]
-Description=Connexa watchdog periodic tick
-[Timer]
-OnBootSec=1min
-OnUnitActiveSec=1min
-Persistent=true
-Unit=connexa-watchdog.service
-[Install]
-WantedBy=timers.target
-UNIT
-
-  cat >/etc/systemd/system/connexa-tls-fallback.service <<'UNIT'
-[Unit]
-Description=Connexa TLS fallback (auto-disable TLS on certificate errors)
-[Service]
-Type=oneshot
-ExecStart=/usr/local/bin/connexa-tls-fallback
-UNIT
-  cat >/etc/systemd/system/connexa-tls-fallback.timer <<'UNIT'
-[Unit]
-Description=Connexa TLS fallback periodic check
-[Timer]
-OnBootSec=2min
-OnUnitActiveSec=10min
-Persistent=true
-Unit=connexa-tls-fallback.service
-[Install]
-WantedBy=timers.target
-UNIT
-
-  cat >/etc/systemd/system/connexa-guardrails.service <<'UNIT'
-[Unit]
-Description=Connexa guardrails (resource usage enforcement)
-[Service]
-Type=oneshot
-Environment=MAX_MEM_MB_HAPROXY=512
-Environment=MAX_CPU_PCT_HAPROXY=250
-Environment=MAX_MEM_MB_3PROXY=256
-Environment=MAX_CPU_PCT_3PROXY=200
-Environment=MAX_MEM_MB_TOR=1024
-Environment=MAX_CPU_PCT_TOR=300
-ExecStart=/usr/local/bin/connexa-guardrails
-UNIT
-  cat >/etc/systemd/system/connexa-guardrails.timer <<'UNIT'
-[Unit]
-Description=Connexa guardrails periodic check
-[Timer]
-OnBootSec=1min
-OnUnitActiveSec=2min
-Persistent=true
-Unit=connexa-guardrails.service
-[Install]
-WantedBy=timers.target
-UNIT
-
+  # API service
   cat >"$API_UNIT" <<'UNIT'
 [Unit]
 Description=Connexa Free Proxy API
@@ -247,9 +262,7 @@ Restart=always
 [Install]
 WantedBy=multi-user.target
 UNIT
-
   systemctl daemon-reload
-  systemctl enable --now connexa-rotation.timer connexa-watchdog.timer connexa-tls-fallback.timer connexa-guardrails.timer
   systemctl enable --now connexa-api
   systemctl enable --now haproxy || true
 }
@@ -293,63 +306,10 @@ UNIT
   echo "[3proxy] installed and service enabled"
 }
 
-wait_for_tor_pool() {
-  for i in {1..30}; do
-    systemctl is-active --quiet tor-pool@1.service && { echo "[tor] pool is active"; return 0; }
-    sleep 1
-  done
-  echo "[tor] pool not active yet (continuing)"
-}
-
-patch_server_py() {
-  local f="$APP_DIR/api/server.py"
-  if [[ -f "$f" ]] && grep -qE 'uvicorn\.run\(.*\)\.[[:space:]]*$' "$f"; then
-    sed -i -E 's/(uvicorn\.run\(.*\))\.[[:space:]]*$/\1/' "$f"
-    echo "[patch] Fixed trailing dot in api/server.py"
-  fi
-}
-
-ufw_allow() {
-  if command -v ufw >/dev/null 2>&1; then
-    ufw allow 8080/tcp || true
-    ufw allow ${STATS_PORT}/tcp || true
-    eval "$(python3 - <<'PY'
-import yaml
-c=yaml.safe_load(open('/etc/connexa/config.yaml'))
-ps=int(c.get('pool_size',50))
-start=int((c.get('external') or {}).get('port_start',40000))
-print(f'POOL_SIZE={{ps}}')
-print(f'PORT_START={{start}}')
-PY
-)"
-    if [[ -n "${PORT_START:-}" && -n "${POOL_SIZE:-}" ]]; then
-      local end=$((PORT_START + POOL_SIZE - 1))
-      ufw allow ${PORT_START}:${end}/tcp || true
-    fi
-  fi
-}
-
-ensure_admin_creds() {
-  if [[ -f "$ADMIN_CREDS_FILE" ]]; then return 0; fi
-  local pass
-  pass=$(openssl rand -base64 12 2>/dev/null || head -c16 /dev/urandom | base64)
-  echo "admin:${pass}" > "$ADMIN_CREDS_FILE"
-  chmod 600 "$ADMIN_CREDS_FILE"
-  echo "[admin] HAProxy stats credentials saved to $ADMIN_CREDS_FILE"
-}
-
-haproxy_direct_fallback() {
-  # If 3proxy missing or inactive, directly map external ports to Tor SOCKS (9050+) and enable stats
-  local active
-  active=$(systemctl is-active 3proxy 2>/dev/null || true)
-  if command -v 3proxy >/dev/null 2>&1 && [[ "$active" == "active" ]]; then
-    echo "[haproxy] 3proxy active, skipping direct fallback."
-    return 0
-  fi
-  ensure_admin_creds
-  local CREDS USER PASS
-  CREDS=$(cat "$ADMIN_CREDS_FILE"); USER="${CREDS%%:*}"; PASS="${CREDS#*:}"
-  echo "[haproxy] applying direct HAProxy->Tor fallback..."
+haproxy_generate_config() {
+  # Decide mapping: 3proxy (if active) or Tor SOCKS directly
+  local active3; active3=$(systemctl is-active 3proxy 2>/dev/null || true)
+  local USE_3PROXY="no"; if command -v 3proxy >/dev/null 2>&1 && [[ "$active3" == "active" ]]; then USE_3PROXY="yes"; fi
   eval "$(python3 - <<'PY'
 import yaml
 c=yaml.safe_load(open('/etc/connexa/config.yaml'))
@@ -359,6 +319,11 @@ print('HOST=%s' % ((c.get('external') or {}).get('host') or ''))
 PY
 )"
   : "${POOL_SIZE:=50}"; : "${PORT_START:=40000}"; : "${HOST:=}"
+  # Stats bind: default admin/admin -> localhost, else 0.0.0.0
+  local CREDS="admin:admin"; [[ -f "$ADMIN_CREDS_FILE" ]] && CREDS="$(cat "$ADMIN_CREDS_FILE")" || true
+  local STATS_BIND="127.0.0.1"; if [[ "$CREDS" != "admin:admin" ]]; then STATS_BIND="0.0.0.0"; fi
+  local USER="${CREDS%%:*}"; local PASS="${CREDS#*:}"
+
   {
     echo "global"
     echo "    daemon"
@@ -371,7 +336,7 @@ PY
     echo "    timeout server  1m"
     echo ""
     echo "listen stats"
-    echo "    bind 0.0.0.0:${STATS_PORT}"
+    echo "    bind ${STATS_BIND}:${STATS_PORT}"
     echo "    stats enable"
     echo "    stats uri /"
     echo "    stats refresh 10s"
@@ -382,20 +347,45 @@ PY
       tor=$((9050+i))
       echo "frontend fe_${ext}"
       echo "    bind *:${ext}"
-      echo "    default_backend be_${tor}"
+      echo "    default_backend be_tor_${tor}"
       echo ""
-      echo "backend be_${tor}"
+      echo "backend be_tor_${tor}"
       echo "    server s1 127.0.0.1:${tor} check"
       echo ""
     done
   } > /etc/haproxy/haproxy.cfg
   systemctl restart haproxy || true
-  if [[ -n "${HOST}" ]]; then
-    echo "[haproxy] stats: http://${HOST}:${STATS_PORT}/ (credentials in $ADMIN_CREDS_FILE)"
-  else
-    echo "[haproxy] stats enabled on port ${STATS_PORT} (credentials in $ADMIN_CREDS_FILE)"
+}
+
+ufw_allow() {
+  if command -v ufw >/dev/null 2>&1; then
+    ufw allow 8080/tcp || true
+    # Only open 8081 after password change
+    if [[ -f "$ADMIN_CREDS_FILE" && "$(cat "$ADMIN_CREDS_FILE")" != "admin:admin" ]]; then
+      ufw allow ${STATS_PORT}/tcp || true
+    fi
+    eval "$(python3 - <<'PY'
+import yaml
+c=yaml.safe_load(open('/etc/connexa/config.yaml'))
+ps=int(c.get('pool_size',50))
+start=int((c.get('external') or {}).get('port_start',40000))
+print(f'POOL_SIZE={ps}')
+print(f'PORT_START={start}')
+PY
+)"
+    if [[ -n "${PORT_START:-}" && -n "${POOL_SIZE:-}" ]]; then
+      local end=$((PORT_START + POOL_SIZE - 1))
+      ufw allow ${PORT_START}:${end}/tcp || true
+    fi
   fi
-  echo "[haproxy] fallback applied."
+}
+
+wait_for_tor_pool() {
+  for i in {1..30}; do
+    systemctl is-active --quiet tor-pool@1.service && { echo "[tor] pool is active"; return 0; }
+    sleep 1
+  done
+  echo "[tor] pool not active yet (continuing)"
 }
 
 main() {
@@ -405,19 +395,23 @@ main() {
   python_env
   ensure_conf
   update_external_host_if_needed
+  ensure_admin_default
   install_cli_and_scripts
   write_tor_pool_unit
   patch_server_py
+  ensure_admin_router_present
   install_systemd_units
   poolproxyctl init || true
   wait_for_tor_pool || true
   install_3proxy_from_source || true
   poolproxyctl expose || true
-  haproxy_direct_fallback
+  haproxy_generate_config
   ufw_allow
+  systemctl restart connexa-api || true
   echo "[install] Done. Health checks:"
   curl -fsS http://127.0.0.1:8080/healthz || true
   curl -fsS http://127.0.0.1:8080/status || true
+  echo "[admin] Панель: http://<ВАШ_IP>:8080/admin (admin/admin — смена обязательна при первом входе)"
 }
 
 main "$@"
