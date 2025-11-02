@@ -1,4 +1,4 @@
-Last login: Sun Nov  2 23:44:30 on ttys000
+Last login: Mon Nov  3 00:06:33 on ttys000
 exchange@Mysteriouss-Air ~ % ssh root@195.26.255.18
 root@195.26.255.18's password: 
 Welcome to Ubuntu 22.04.5 LTS (GNU/Linux 5.15.0-160-generic x86_64)
@@ -7,13 +7,13 @@ Welcome to Ubuntu 22.04.5 LTS (GNU/Linux 5.15.0-160-generic x86_64)
  * Management:     https://landscape.canonical.com
  * Support:        https://ubuntu.com/pro
 
- System information as of Sun Nov  2 17:54:13 CET 2025
+ System information as of Sun Nov  2 18:19:20 CET 2025
 
-  System load:           0.02
+  System load:           0.15
   Usage of /:            1.2% of 387.48GB
   Memory usage:          15%
   Swap usage:            0%
-  Processes:             211
+  Processes:             210
   Users logged in:       0
   IPv4 address for eth0: 195.26.255.18
   IPv6 address for eth0: 2605:a140:2288:1987::1
@@ -42,17 +42,12 @@ Welcome!
 This server is hosted by Contabo. If you have any questions or need help,
 please don't hesitate to contact us at support@contabo.com.
 
-Last login: Sun Nov  2 17:44:43 2025 from 113.189.109.248
-root@vmi2881987:~# sudo tee /tmp/connexa-install.sh > /dev/null <<'SH'
-[вставьте сюда весь текст из файла scripts/install.sh из блока выше]
-SH
-sudo bash /tmp/connexa-install.sh
-/tmp/connexa-install.sh: line 1: [вставьте: command not found
+Last login: Sun Nov  2 18:06:44 2025 from 113.189.109.248
 root@vmi2881987:~# curl -fsSL https://raw.githubusercontent.com/mrolivershea-cyber/Connexa-Free-Proxy/main/scripts/install.sh | sudo bash
-Hit:1 http://archive.ubuntu.com/ubuntu jammy InRelease
-Hit:2 http://archive.ubuntu.com/ubuntu jammy-updates InRelease
-Hit:3 http://archive.ubuntu.com/ubuntu jammy-backports InRelease
-Hit:4 http://security.ubuntu.com/ubuntu jammy-security InRelease
+Hit:1 http://security.ubuntu.com/ubuntu jammy-security InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu jammy InRelease     
+Hit:3 http://archive.ubuntu.com/ubuntu jammy-updates InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu jammy-backports InRelease
 Reading package lists... Done
 Reading package lists... Done
 Building dependency tree... Done
@@ -75,18 +70,7 @@ Reading package lists... Done
 Building dependency tree... Done
 Reading state information... Done
 E: Unable to locate package 3proxy
-remote: Enumerating objects: 11, done.
-remote: Counting objects: 100% (11/11), done.
-remote: Compressing objects: 100% (7/7), done.
-remote: Total 7 (delta 5), reused 0 (delta 0), pack-reused 0 (from 0)
-Unpacking objects: 100% (7/7), 3.81 KiB | 1.27 MiB/s, done.
-From https://github.com/mrolivershea-cyber/Connexa-Free-Proxy
-   aea66b6..ec7a881  main       -> origin/main
-Updating aea66b6..ec7a881
-Fast-forward
- LOGI SERVER        |  48 ++++----
- scripts/install.sh | 314 ++++++++++++++++++++++++++---------------------------
- 2 files changed, 173 insertions(+), 189 deletions(-)
+Already up to date.
 Requirement already satisfied: pip in /usr/local/lib/python3.10/dist-packages (25.3)
 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
 Requirement already satisfied: fastapi in /usr/local/lib/python3.10/dist-packages (0.120.4)
@@ -136,4 +120,12 @@ curl: (7) Failed to connect to 127.0.0.1 port 8080 after 0 ms: Connection refuse
 curl: (7) Failed to connect to 127.0.0.1 port 8080 after 0 ms: Connection refused
 [admin] Панель: http://<ВАШ_IP>:8080/admin (admin/admin — смена обязательна при первом входе)
 root@vmi2881987:~# sudo systemctl restart connexa-api
-root@vmi2881987:~# 
+root@vmi2881987:~# curl -i http://127.0.0.1:8080/admin
+HTTP/1.1 401 Unauthorized
+date: Sun, 02 Nov 2025 17:22:53 GMT
+server: uvicorn
+www-authenticate: Basic
+content-length: 30
+content-type: application/json
+
+{"detail":"Not authenticated"}root@vmi2881987:~# 
