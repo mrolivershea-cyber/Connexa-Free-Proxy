@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import sys, os, json, click, yaml, subprocess, re, random
+import sys, os, json, click, yaml, subprocess, re, random, socket
 from pathlib import Path
 from typing import List, Optional
 
@@ -86,6 +86,7 @@ def render_haproxy(port_start: int, pool_size: int):
         ]
     HAPROXY_CFG.write_text("\n".join(lines) + "\n")
 
+
 def render_3proxy(pool_size: int):
     cfg_lines = [
         "daemon",
@@ -112,6 +113,7 @@ def render_3proxy(pool_size: int):
             f'parent 1000 socks5 127.0.0.1 {parent_port} "" ""',
         ]
     THREEPROXY_CFG.write_text("\n".join(cfg_lines) + "\n")
+
 
 def write_whitelist(ips: List[str]):
     lines = []
@@ -165,6 +167,37 @@ def set_mac_addr(iface: str, mac: str) -> bool:
         return r.returncode == 0
     except Exception:
         return False
+
+# ---------- Tor NEWNYM helpers ----------
+def read_cookie_hex(node_i: int) -> str:
+    cookie = TOR_DATA_DIR / f"node-{node_i}" / "control_auth_cookie"
+    return cookie.read_bytes().hex()
+
+def send_newnym(ctrl_port: int, cookie_hex: str, host: str="127.0.0.1", timeout=2.0) -> str:
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.settimeout(timeout)
+    try:
+        s.connect((host, ctrl_port))
+        try:
+            s.recv(1024)
+        except Exception:
+            pass
+        s.sendall(f"AUTHENTICATE {cookie_hex}\r\n".encode())
+        r = s.recv(1024).decode(errors="ignore")
+        if not r.startswith("250"):
+            return f"AUTH FAIL: {r.strip()}"
+        s.sendall(b"SIGNAL NEWNYM\r\n")
+        r = s.recv(1024).decode(errors="ignore")
+        if not r.startswith("250"):
+            return f"NEWNYM FAIL: {r.strip()}"
+        return "OK"
+    except Exception as e:
+        return f"ERR: {e}"
+    finally:
+        try:
+            s.close()
+        except Exception:
+            pass
 
 # ---------- CLI ----------
 @click.group()
@@ -220,9 +253,9 @@ def selftest_run(profile):
         ok = False; msgs.append(f"binaries: {e}")
     for svc in ["haproxy", "3proxy"]:
         r = sh(["systemctl", "is-enabled", svc], check=False)
-        msgs.append(f"{svc}: enabled={r.returncode==0}")
+        msgs.append(f"{svc}: enabled={{r.returncode==0}}")
     r = sh(["systemctl", "is-active", "tor-pool@1"], check=False)
-    msgs.append(f"tor-pool@1 active={r.returncode==0}")
+    msgs.append(f"tor-pool@1 active={{r.returncode==0}}")
     print("\n".join(["[selftest] "+m for m in msgs]))
     print("[selftest] RESULT=", "OK" if ok else "FAIL")
 
@@ -254,20 +287,32 @@ def hide():
     print("[hide] Done.")
 
 # -------- export via CLI ----------
-@cli.command("export")
-@click.argument("fmt", type=click.Choice(["txt", "csv", "json"]))
+@cli.group("export")
+def export_grp():
+    """Экспорт списка эндпоинтов"""
+    pass
+
+@export_grp.command("txt")
 @click.option("--host", help="Override host for endpoints (default from config.external.host)")
-def export_cmd(fmt: str, host: Optional[str]):
-    """Экспорт списка эндпоинтов (txt/csv/json) в stdout."""
+def export_txt(host: Optional[str]):
     c = load_cfg()
     eps = build_export_endpoints(c, host_override=host)
-    if fmt == "txt":
-        print("\n".join(eps))
-    elif fmt == "csv":
-        print("endpoint")
-        print("\n".join(eps))
-    else:
-        print(json.dumps({"endpoints": eps, "count": len(eps)}, indent=2))
+    print("\n".join(eps))
+
+@export_grp.command("csv")
+@click.option("--host", help="Override host for endpoints (default from config.external.host)")
+def export_csv(host: Optional[str]):
+    c = load_cfg()
+    eps = build_export_endpoints(c, host_override=host)
+    print("endpoint")
+    print("\n".join(eps))
+
+@export_grp.command("json")
+@click.option("--host", help="Override host for endpoints (default from config.external.host)")
+def export_json(host: Optional[str]):
+    c = load_cfg()
+    eps = build_export_endpoints(c, host_override=host)
+    print(json.dumps({"endpoints": eps, "count": len(eps)}, indent=2))
 
 # -------- MAC isolation ----------
 @cli.group()
@@ -316,7 +361,7 @@ def mac_selftest():
     print("[mac] ifaces:", ", ".join(list_ifaces()))
 
 # -------- Uplink/SNAT (skeleton) ----------
-@click.group()
+@cli.group()
 def uplink():
     """Multi-uplink/SNAT (скелет команд add/del/list)."""
     pass
@@ -332,12 +377,58 @@ def uplink_list():
 @click.option("--gw", required=True, help="Шлюз, например 192.0.2.1")
 @click.option("--metric", default=100, type=int)
 def uplink_add(name: str, dev: str, gw: str, metric: int):
-    print(f"[uplink] add name={name} dev={dev} gw={gw} metric={metric} (placeholder)")
+    print(f"[uplink] add name={{name}} dev={{dev}} gw={{gw}} metric={{metric}} (placeholder)")
 
 @uplink.command("del")
 @click.argument("name")
 def uplink_del(name: str):
-    print(f"[uplink] del name={name} (placeholder)")
+    print(f"[uplink] del name={{name}} (placeholder)")
+
+# -------- Tor rotation via CLI ----------
+@cli.group()
+def rotate():
+    """Ротация Tor: NEWNYM или перезапуск"""
+    pass
+
+@rotate.command("newnym")
+@click.option("--nodes", help="Список узлов, например 1,2,5 (по умолчанию все)")
+def rotate_newnym(nodes: Optional[str]):
+    c = load_cfg()
+    pool = int(c.get("pool_size", 50))
+    if nodes:
+        ids = []
+        for part in nodes.split(","):
+            part = part.strip()
+            if part:
+                try:
+                    ids.append(int(part))
+                except Exception:
+                    pass
+    else:
+        ids = list(range(1, pool+1))
+    ok = 0
+    for i in ids:
+        ctrl = 10510 + (i-1)
+        try:
+            ck = read_cookie_hex(i)
+        except Exception as e:
+            print(f"[rotate] node {i}: COOKIE ERR {e}")
+            continue
+        res = send_newnym(ctrl, ck)
+        print(f"[rotate] node {i}: {{res}}")
+        if res == "OK":
+            ok += 1
+    print(f"[rotate] OK={{ok}}/{{len(ids)}}")
+
+@rotate.command("restart")
+def rotate_restart():
+    c = load_cfg()
+    pool = int(c.get("pool_size", 50))
+    for i in range(1, pool+1):
+        unit = f"tor-pool@{i}.service"
+        print(f"[rotation] restarting {{unit}}...")
+        sh(["systemctl", "restart", unit], check=False)
+    print("[rotation] done.")
 
 if __name__ == "__main__":
     cli()
