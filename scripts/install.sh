@@ -11,6 +11,7 @@ API_UNIT="/etc/systemd/system/connexa-api.service"
 CFG_FILE="/etc/connexa/config.yaml"
 ADMIN_CREDS_FILE="/etc/connexa/haproxy-admin"
 STATS_PORT=8081
+THREEPROXY_VERSION="0.9.4"
 
 require_root() {
   if [[ "${EUID}" -ne 0 ]]; then
@@ -22,8 +23,9 @@ require_root() {
 pkg_install() {
   export DEBIAN_FRONTEND=noninteractive
   apt-get update
-  # 3proxy may be unavailable in some repos — not fatal
-  apt-get install -y git python3-pip haproxy tor jq ufw curl ca-certificates || true
+  # base deps
+  apt-get install -y git python3-pip haproxy tor jq ufw curl ca-certificates openssl build-essential make gcc wget || true
+  # try 3proxy via apt (may be absent)
   apt-get install -y 3proxy || true
 }
 
@@ -43,7 +45,6 @@ python_env() {
 
 ensure_conf() {
   mkdir -p /etc/connexa /etc/haproxy /etc/3proxy /etc/tor/pool /var/lib/tor/pool /var/log/tor/pool
-  # permissions for tor data/log
   chown -R debian-tor:debian-tor /var/lib/tor/pool || true
   chown -R debian-tor:debian-tor /var/log/tor/pool || true
   if [[ ! -f "$CFG_FILE" ]]; then
@@ -78,20 +79,18 @@ get_public_ipv4() {
 }
 
 update_external_host_if_needed() {
-  # If config.external.host is missing or 127.0.0.1, set to detected public IPv4
   local PUBIP
   PUBIP=$(get_public_ipv4)
   if [[ -z "${PUBIP:-}" ]]; then PUBIP=$(hostname -I 2>/dev/null | awk '{print $1}'); fi
   if [[ -z "${PUBIP:-}" ]]; then echo "[host] cannot detect public IPv4, skipping"; return 0; fi
   python3 - "$PUBIP" <<'PY'
-import sys, yaml, os
+import sys, yaml
 cfg_path = "/etc/connexa/config.yaml"
-with open(cfg_path,'r') as f:
-    c = yaml.safe_load(f)
+with open(cfg_path,'r') as f: c = yaml.safe_load(f)
 external = c.get('external') or {}
 host = (external.get('host') or '').strip()
 new_host = sys.argv[1]
-if host in ('', '127.0.0.1', '0.0.0.0', 'localhost'):
+if host in ('','127.0.0.1','0.0.0.0','localhost'):
     external['host'] = new_host
     c['external'] = external
     with open(cfg_path,'w') as f:
@@ -104,11 +103,9 @@ PY
 
 install_cli_and_scripts() {
   install -m 0755 "$APP_DIR/cli/poolproxyctl.py" /usr/local/bin/poolproxyctl
-  # Service helper scripts
-  install -m 0755 "$APP_DIR/scripts/watchdog.sh"      /usr/local/bin/connexa-watchdog || true
-  # Rotation helper (fallback inline if missing in repo)
+  install -m 0755 "$APP_DIR/scripts/watchdog.sh" /usr/local/bin/connexa-watchdog || true
   if [[ -f "$APP_DIR/scripts/rotation.sh" ]]; then
-    install -m 0755 "$APP_DIR/scripts/rotation.sh"   /usr/local/bin/connexa-rotation
+    install -m 0755 "$APP_DIR/scripts/rotation.sh" /usr/local/bin/connexa-rotation
   else
     cat >/usr/local/bin/connexa-rotation <<'SH'
 #!/usr/bin/env bash
@@ -124,21 +121,19 @@ echo "[rotation] done."
 SH
     chmod +x /usr/local/bin/connexa-rotation
   fi
-  # TLS fallback & guardrails: install if present, otherwise place stubs to avoid failing timers
   if [[ -f "$APP_DIR/scripts/tls-fallback.sh" ]]; then
     install -m 0755 "$APP_DIR/scripts/tls-fallback.sh" /usr/local/bin/connexa-tls-fallback
   else
     printf '#!/usr/bin/env bash\nexit 0\n' > /usr/local/bin/connexa-tls-fallback && chmod +x /usr/local/bin/connexa-tls-fallback
   fi
   if [[ -f "$APP_DIR/scripts/guardrails.sh" ]]; then
-    install -m 0755 "$APP_DIR/scripts/guardrails.sh"   /usr/local/bin/connexa-guardrails
+    install -m 0755 "$APP_DIR/scripts/guardrails.sh" /usr/local/bin/connexa-guardrails
   else
     printf '#!/usr/bin/env bash\nexit 0\n' > /usr/local/bin/connexa-guardrails && chmod +x /usr/local/bin/connexa-guardrails
   fi
 }
 
 write_tor_pool_unit() {
-  # Ensure a correct tor-pool@.service template exists
   cat >/etc/systemd/system/tor-pool@.service <<'UNIT'
 [Unit]
 Description=Tor pool node %i
@@ -158,7 +153,6 @@ UNIT
 }
 
 install_systemd_units() {
-  # Rotation timer
   cat >/etc/systemd/system/connexa-rotation.service <<'UNIT'
 [Unit]
 Description=Connexa rotation job (Tor pool soft rotation)
@@ -177,7 +171,6 @@ Unit=connexa-rotation.service
 WantedBy=timers.target
 UNIT
 
-  # Watchdog
   cat >/etc/systemd/system/connexa-watchdog.service <<'UNIT'
 [Unit]
 Description=Connexa watchdog (haproxy/3proxy)
@@ -197,7 +190,6 @@ Unit=connexa-watchdog.service
 WantedBy=timers.target
 UNIT
 
-  # TLS fallback
   cat >/etc/systemd/system/connexa-tls-fallback.service <<'UNIT'
 [Unit]
 Description=Connexa TLS fallback (auto-disable TLS on certificate errors)
@@ -217,7 +209,6 @@ Unit=connexa-tls-fallback.service
 WantedBy=timers.target
 UNIT
 
-  # Guardrails
   cat >/etc/systemd/system/connexa-guardrails.service <<'UNIT'
 [Unit]
 Description=Connexa guardrails (resource usage enforcement)
@@ -243,7 +234,6 @@ Unit=connexa-guardrails.service
 WantedBy=timers.target
 UNIT
 
-  # API service
   cat >"$API_UNIT" <<'UNIT'
 [Unit]
 Description=Connexa Free Proxy API
@@ -264,8 +254,46 @@ UNIT
   systemctl enable --now haproxy || true
 }
 
+install_3proxy_from_source() {
+  if command -v 3proxy >/dev/null 2>&1; then
+    echo "[3proxy] already present"
+    return 0
+  fi
+  echo "[3proxy] building from source v${THREEPROXY_VERSION}..."
+  tmpd=$(mktemp -d); trap 'rm -rf "$tmpd"' EXIT
+  ( cd "$tmpd" && \
+    wget -qO 3proxy.tar.gz https://github.com/z3APA3A/3proxy/archive/refs/tags/${THREEPROXY_VERSION}.tar.gz && \
+    tar -xzf 3proxy.tar.gz && cd 3proxy-* && \
+    make -f Makefile.Linux >/dev/null 2>&1 || make -f Makefile.Linux ) || true
+  # install binary
+  if [[ -f "$tmpd"/3proxy-*/src/3proxy ]]; then
+    install -m 0755 "$tmpd"/3proxy-*/src/3proxy /usr/local/sbin/3proxy
+  elif [[ -f "$tmpd"/3proxy-*/bin/3proxy ]]; then
+    install -m 0755 "$tmpd"/3proxy-*/bin/3proxy /usr/local/sbin/3proxy
+  fi
+  if ! command -v 3proxy >/dev/null 2>&1; then
+    echo "[3proxy] build failed, will use HAProxy->Tor fallback"
+    return 0
+  fi
+  mkdir -p /etc/3proxy /var/log/3proxy
+  cat >/etc/systemd/system/3proxy.service <<'UNIT'
+[Unit]
+Description=3proxy tiny proxy server
+After=network.target
+[Service]
+Type=simple
+ExecStart=/usr/local/sbin/3proxy /etc/3proxy/3proxy.cfg
+Restart=always
+RestartSec=3
+[Install]
+WantedBy=multi-user.target
+UNIT
+  systemctl daemon-reload
+  systemctl enable --now 3proxy || true
+  echo "[3proxy] installed and service enabled"
+}
+
 wait_for_tor_pool() {
-  # Wait up to 30s for first pool unit to become active
   for i in {1..30}; do
     systemctl is-active --quiet tor-pool@1.service && { echo "[tor] pool is active"; return 0; }
     sleep 1
@@ -274,7 +302,6 @@ wait_for_tor_pool() {
 }
 
 patch_server_py() {
-  # Fix accidental trailing dot at the end of uvicorn.run(...) line if present
   local f="$APP_DIR/api/server.py"
   if [[ -f "$f" ]] && grep -qE 'uvicorn\.run\(.*\)\.[[:space:]]*$' "$f"; then
     sed -i -E 's/(uvicorn\.run\(.*\))\.[[:space:]]*$/\1/' "$f"
@@ -283,10 +310,9 @@ patch_server_py() {
 }
 
 ufw_allow() {
-  # Open API port if ufw is installed
   if command -v ufw >/dev/null 2>&1; then
     ufw allow 8080/tcp || true
-    # Also open external proxy range from config
+    ufw allow ${STATS_PORT}/tcp || true
     eval "$(python3 - <<'PY'
 import yaml
 c=yaml.safe_load(open('/etc/connexa/config.yaml'))
@@ -296,9 +322,7 @@ print(f'POOL_SIZE={{ps}}')
 print(f'PORT_START={{start}}')
 PY
 )"
-    if [[ -n "
-${PORT_START:-}" && -n "
-${POOL_SIZE:-}" ]]; then
+    if [[ -n "${PORT_START:-}" && -n "${POOL_SIZE:-}" ]]; then
       local end=$((PORT_START + POOL_SIZE - 1))
       ufw allow ${PORT_START}:${end}/tcp || true
     fi
@@ -306,30 +330,28 @@ ${POOL_SIZE:-}" ]]; then
 }
 
 ensure_admin_creds() {
-  if [[ -f "$ADMIN_CREDS_FILE" ]]; then
-    return 0
-  fi
+  if [[ -f "$ADMIN_CREDS_FILE" ]]; then return 0; fi
   local pass
   pass=$(openssl rand -base64 12 2>/dev/null || head -c16 /dev/urandom | base64)
   echo "admin:${pass}" > "$ADMIN_CREDS_FILE"
   chmod 600 "$ADMIN_CREDS_FILE"
-  echo "[admin] HAProxy stats credentials: admin:${pass} (stored in $ADMIN_CREDS_FILE)"
+  echo "[admin] HAProxy stats credentials saved to $ADMIN_CREDS_FILE"
 }
 
 haproxy_direct_fallback() {
-  # If 3proxy is missing, directly map external ports to Tor SOCKS (9050+), add a stats page
-  if command -v 3proxy >/dev/null 2>&1; then
-    echo "[haproxy] 3proxy present, skipping direct fallback."
+  # If 3proxy missing or inactive, directly map external ports to Tor SOCKS (9050+) and enable stats
+  local active
+  active=$(systemctl is-active 3proxy 2>/dev/null || true)
+  if command -v 3proxy >/dev/null 2>&1 && [[ "$active" == "active" ]]; then
+    echo "[haproxy] 3proxy active, skipping direct fallback."
     return 0
   fi
   ensure_admin_creds
-  local CREDS
-  CREDS=$(cat "$ADMIN_CREDS_FILE")
-  local USER PASS
-  USER="${CREDS%%:*}"; PASS="${CREDS#*:}"
-  echo "[haproxy] 3proxy missing, applying direct HAProxy->Tor fallback..."
+  local CREDS USER PASS
+  CREDS=$(cat "$ADMIN_CREDS_FILE"); USER="${CREDS%%:*}"; PASS="${CREDS#*:}"
+  echo "[haproxy] applying direct HAProxy->Tor fallback..."
   eval "$(python3 - <<'PY'
-import yaml, sys
+import yaml
 c=yaml.safe_load(open('/etc/connexa/config.yaml'))
 print('POOL_SIZE=%d' % int(c.get('pool_size',50)))
 print('PORT_START=%d' % int((c.get('external') or {}).get('port_start',40000)))
@@ -369,9 +391,9 @@ PY
   } > /etc/haproxy/haproxy.cfg
   systemctl restart haproxy || true
   if [[ -n "${HOST}" ]]; then
-    echo "[haproxy] stats: http://${HOST}:${STATS_PORT}/ (user=${USER})"
+    echo "[haproxy] stats: http://${HOST}:${STATS_PORT}/ (credentials in $ADMIN_CREDS_FILE)"
   else
-    echo "[haproxy] stats enabled on port ${STATS_PORT} (user=${USER})"
+    echo "[haproxy] stats enabled on port ${STATS_PORT} (credentials in $ADMIN_CREDS_FILE)"
   fi
   echo "[haproxy] fallback applied."
 }
@@ -389,9 +411,10 @@ main() {
   install_systemd_units
   poolproxyctl init || true
   wait_for_tor_pool || true
+  install_3proxy_from_source || true
   poolproxyctl expose || true
-  ufw_allow
   haproxy_direct_fallback
+  ufw_allow
   echo "[install] Done. Health checks:"
   curl -fsS http://127.0.0.1:8080/healthz || true
   curl -fsS http://127.0.0.1:8080/status || true
