@@ -1,4 +1,4 @@
-Last login: Sun Nov  2 23:00:10 on ttys000
+Last login: Sun Nov  2 23:11:21 on ttys000
 exchange@Mysteriouss-Air ~ % ssh root@195.26.255.18
 root@195.26.255.18's password: 
 Welcome to Ubuntu 22.04.5 LTS (GNU/Linux 5.15.0-160-generic x86_64)
@@ -7,13 +7,13 @@ Welcome to Ubuntu 22.04.5 LTS (GNU/Linux 5.15.0-160-generic x86_64)
  * Management:     https://landscape.canonical.com
  * Support:        https://ubuntu.com/pro
 
- System information as of Sun Nov  2 17:11:30 CET 2025
+ System information as of Sun Nov  2 17:19:17 CET 2025
 
-  System load:           0.13
+  System load:           0.47
   Usage of /:            1.2% of 387.48GB
   Memory usage:          15%
   Swap usage:            0%
-  Processes:             210
+  Processes:             228
   Users logged in:       0
   IPv4 address for eth0: 195.26.255.18
   IPv6 address for eth0: 2605:a140:2288:1987::1
@@ -42,7 +42,7 @@ Welcome!
 This server is hosted by Contabo. If you have any questions or need help,
 please don't hesitate to contact us at support@contabo.com.
 
-Last login: Sun Nov  2 17:00:21 2025 from 113.189.109.248
+Last login: Sun Nov  2 17:11:32 2025 from 113.189.109.248
 root@vmi2881987:~# curl -fsSL https://raw.githubusercontent.com/mrolivershea-cyber/Connexa-Free-Proxy/main/scripts/install.sh | sudo bash
 Hit:1 http://security.ubuntu.com/ubuntu jammy-security InRelease
 Hit:2 http://archive.ubuntu.com/ubuntu jammy InRelease     
@@ -53,11 +53,8 @@ Reading package lists... Done
 Building dependency tree... Done
 Reading state information... Done
 build-essential is already the newest version (12.9ubuntu3).
-build-essential set to manually installed.
 gcc is already the newest version (4:11.2.0-1ubuntu1).
-gcc set to manually installed.
 make is already the newest version (4.3-4.1build1).
-make set to manually installed.
 tor is already the newest version (0.4.6.10-1).
 ca-certificates is already the newest version (20240203~22.04.1).
 curl is already the newest version (7.81.0-1ubuntu1.21).
@@ -65,28 +62,25 @@ git is already the newest version (1:2.34.1-1ubuntu1.15).
 haproxy is already the newest version (2.4.24-0ubuntu0.22.04.3).
 jq is already the newest version (1.6-2.1ubuntu3.1).
 openssl is already the newest version (3.0.2-0ubuntu1.20).
-openssl set to manually installed.
 ufw is already the newest version (0.36.1-4ubuntu0.1).
 wget is already the newest version (1.21.2-2ubuntu1.1).
-wget set to manually installed.
 python3-pip is already the newest version (22.0.2+dfsg-1ubuntu0.7).
 0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
 Reading package lists... Done
 Building dependency tree... Done
 Reading state information... Done
 E: Unable to locate package 3proxy
-remote: Enumerating objects: 11, done.
-remote: Counting objects: 100% (11/11), done.
-remote: Compressing objects: 100% (7/7), done.
-remote: Total 7 (delta 5), reused 0 (delta 0), pack-reused 0 (from 0)
-Unpacking objects: 100% (7/7), 2.62 KiB | 536.00 KiB/s, done.
+remote: Enumerating objects: 5, done.
+remote: Counting objects: 100% (5/5), done.
+remote: Compressing objects: 100% (3/3), done.
+remote: Total 3 (delta 2), reused 0 (delta 0), pack-reused 0 (from 0)
+Unpacking objects: 100% (3/3), 1.53 KiB | 391.00 KiB/s, done.
 From https://github.com/mrolivershea-cyber/Connexa-Free-Proxy
-   456b523..a02c184  main       -> origin/main
-Updating 456b523..a02c184
+   a02c184..c6294d3  main       -> origin/main
+Updating a02c184..c6294d3
 Fast-forward
- LOGI SERVER        |  85 +++++++++--------------------------------
- scripts/install.sh | 109 ++++++++++++++++++++++++++++++++---------------------
- 2 files changed, 83 insertions(+), 111 deletions(-)
+ LOGI SERVER | 53 ++++++++++++++++++++++++++++++++++++-----------------
+ 1 file changed, 36 insertions(+), 17 deletions(-)
 Requirement already satisfied: pip in /usr/local/lib/python3.10/dist-packages (25.3)
 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
 Requirement already satisfied: fastapi in /usr/local/lib/python3.10/dist-packages (0.120.4)
@@ -125,13 +119,12 @@ Executing: /lib/systemd/systemd-sysv-install enable haproxy
 [expose] Writing whitelist...
 [expose] Restart services...
 [expose] Done.
-[admin] HAProxy stats credentials saved to /etc/connexa/haproxy-admin
 [haproxy] applying direct HAProxy->Tor fallback...
 [haproxy] stats: http://195.26.255.18:8081/ (credentials in /etc/connexa/haproxy-admin)
 [haproxy] fallback applied.
 Skipping adding existing rule
 Skipping adding existing rule (v6)
-Rules updated
-Rules updated (v6)
+Skipping adding existing rule
+Skipping adding existing rule (v6)
 main: line 326: {start}: syntax error: operand expected (error token is "{start}")
 root@vmi2881987:~# 
