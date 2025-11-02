@@ -9,6 +9,8 @@ REPO_URL="https://github.com/mrolivershea-cyber/Connexa-Free-Proxy"
 APP_DIR="/opt/Connexa-Free-Proxy"
 API_UNIT="/etc/systemd/system/connexa-api.service"
 CFG_FILE="/etc/connexa/config.yaml"
+ADMIN_CREDS_FILE="/etc/connexa/haproxy-admin"
+STATS_PORT=8081
 
 require_root() {
   if [[ "${EUID}" -ne 0 ]]; then
@@ -21,7 +23,7 @@ pkg_install() {
   export DEBIAN_FRONTEND=noninteractive
   apt-get update
   # 3proxy may be unavailable in some repos — not fatal
-  apt-get install -y git python3-pip haproxy tor jq ufw || true
+  apt-get install -y git python3-pip haproxy tor jq ufw curl ca-certificates || true
   apt-get install -y 3proxy || true
 }
 
@@ -69,6 +71,35 @@ network:
 YAML
     fi
   fi
+}
+
+get_public_ipv4() {
+  ip -4 route get 1.1.1.1 2>/dev/null | awk '/src/ {for(i=1;i<=NF;i++){if($i=="src"){print $(i+1); exit}}}' || true
+}
+
+update_external_host_if_needed() {
+  # If config.external.host is missing or 127.0.0.1, set to detected public IPv4
+  local PUBIP
+  PUBIP=$(get_public_ipv4)
+  if [[ -z "${PUBIP:-}" ]]; then PUBIP=$(hostname -I 2>/dev/null | awk '{print $1}'); fi
+  if [[ -z "${PUBIP:-}" ]]; then echo "[host] cannot detect public IPv4, skipping"; return 0; fi
+  python3 - "$PUBIP" <<'PY'
+import sys, yaml, os
+cfg_path = "/etc/connexa/config.yaml"
+with open(cfg_path,'r') as f:
+    c = yaml.safe_load(f)
+external = c.get('external') or {}
+host = (external.get('host') or '').strip()
+new_host = sys.argv[1]
+if host in ('', '127.0.0.1', '0.0.0.0', 'localhost'):
+    external['host'] = new_host
+    c['external'] = external
+    with open(cfg_path,'w') as f:
+        yaml.safe_dump(c, f, sort_keys=False, allow_unicode=True)
+    print(f"[host] external.host set to {new_host}")
+else:
+    print(f"[host] external.host kept as {host}")
+PY
 }
 
 install_cli_and_scripts() {
@@ -127,7 +158,7 @@ UNIT
 }
 
 install_systemd_units() {
-  # Rotation
+  # Rotation timer
   cat >/etc/systemd/system/connexa-rotation.service <<'UNIT'
 [Unit]
 Description=Connexa rotation job (Tor pool soft rotation)
@@ -230,12 +261,16 @@ UNIT
   systemctl daemon-reload
   systemctl enable --now connexa-rotation.timer connexa-watchdog.timer connexa-tls-fallback.timer connexa-guardrails.timer
   systemctl enable --now connexa-api
+  systemctl enable --now haproxy || true
 }
 
-bootstrap_services() {
-  # init tor pool and expose ports
-  poolproxyctl init || true
-  poolproxyctl expose || true
+wait_for_tor_pool() {
+  # Wait up to 30s for first pool unit to become active
+  for i in {1..30}; do
+    systemctl is-active --quiet tor-pool@1.service && { echo "[tor] pool is active"; return 0; }
+    sleep 1
+  done
+  echo "[tor] pool not active yet (continuing)"
 }
 
 patch_server_py() {
@@ -251,25 +286,57 @@ ufw_allow() {
   # Open API port if ufw is installed
   if command -v ufw >/dev/null 2>&1; then
     ufw allow 8080/tcp || true
+    # Also open external proxy range from config
+    eval "$(python3 - <<'PY'
+import yaml
+c=yaml.safe_load(open('/etc/connexa/config.yaml'))
+ps=int(c.get('pool_size',50))
+start=int((c.get('external') or {}).get('port_start',40000))
+print(f'POOL_SIZE={{ps}}')
+print(f'PORT_START={{start}}')
+PY
+)"
+    if [[ -n "
+${PORT_START:-}" && -n "
+${POOL_SIZE:-}" ]]; then
+      local end=$((PORT_START + POOL_SIZE - 1))
+      ufw allow ${PORT_START}:${end}/tcp || true
+    fi
   fi
 }
 
+ensure_admin_creds() {
+  if [[ -f "$ADMIN_CREDS_FILE" ]]; then
+    return 0
+  fi
+  local pass
+  pass=$(openssl rand -base64 12 2>/dev/null || head -c16 /dev/urandom | base64)
+  echo "admin:${pass}" > "$ADMIN_CREDS_FILE"
+  chmod 600 "$ADMIN_CREDS_FILE"
+  echo "[admin] HAProxy stats credentials: admin:${pass} (stored in $ADMIN_CREDS_FILE)"
+}
+
 haproxy_direct_fallback() {
-  # If 3proxy is missing, directly map external ports to Tor SOCKS (9050+)
+  # If 3proxy is missing, directly map external ports to Tor SOCKS (9050+), add a stats page
   if command -v 3proxy >/dev/null 2>&1; then
     echo "[haproxy] 3proxy present, skipping direct fallback."
     return 0
   fi
+  ensure_admin_creds
+  local CREDS
+  CREDS=$(cat "$ADMIN_CREDS_FILE")
+  local USER PASS
+  USER="${CREDS%%:*}"; PASS="${CREDS#*:}"
   echo "[haproxy] 3proxy missing, applying direct HAProxy->Tor fallback..."
   eval "$(python3 - <<'PY'
 import yaml, sys
-c=yaml.safe_load(open("/etc/connexa/config.yaml"))
-print("POOL_SIZE=%d" % int(c.get("pool_size",50)))
-print("PORT_START=%d" % int((c.get("external") or {}).get("port_start",40000)))
+c=yaml.safe_load(open('/etc/connexa/config.yaml'))
+print('POOL_SIZE=%d' % int(c.get('pool_size',50)))
+print('PORT_START=%d' % int((c.get('external') or {}).get('port_start',40000)))
+print('HOST=%s' % ((c.get('external') or {}).get('host') or ''))
 PY
 )"
-  : "${POOL_SIZE:=50}"
-  : "${PORT_START:=40000}"
+  : "${POOL_SIZE:=50}"; : "${PORT_START:=40000}"; : "${HOST:=}"
   {
     echo "global"
     echo "    daemon"
@@ -280,6 +347,13 @@ PY
     echo "    timeout connect 5s"
     echo "    timeout client  1m"
     echo "    timeout server  1m"
+    echo ""
+    echo "listen stats"
+    echo "    bind 0.0.0.0:${STATS_PORT}"
+    echo "    stats enable"
+    echo "    stats uri /"
+    echo "    stats refresh 10s"
+    echo "    stats auth ${USER}:${PASS}"
     echo ""
     for ((i=0; i<POOL_SIZE; i++)); do
       ext=$((PORT_START+i))
@@ -294,6 +368,11 @@ PY
     done
   } > /etc/haproxy/haproxy.cfg
   systemctl restart haproxy || true
+  if [[ -n "${HOST}" ]]; then
+    echo "[haproxy] stats: http://${HOST}:${STATS_PORT}/ (user=${USER})"
+  else
+    echo "[haproxy] stats enabled on port ${STATS_PORT} (user=${USER})"
+  fi
   echo "[haproxy] fallback applied."
 }
 
@@ -303,11 +382,14 @@ main() {
   fetch_code
   python_env
   ensure_conf
+  update_external_host_if_needed
   install_cli_and_scripts
   write_tor_pool_unit
   patch_server_py
   install_systemd_units
-  bootstrap_services
+  poolproxyctl init || true
+  wait_for_tor_pool || true
+  poolproxyctl expose || true
   ufw_allow
   haproxy_direct_fallback
   echo "[install] Done. Health checks:"
