@@ -1,0 +1,143 @@
+# Connexa Free Proxy — базовая конфигурация (v1)
+pool_size: 50
+pool_max: 500
+
+external:
+  protocol_default: socks5         # socks5|http|https
+  access_mode_default: both        # both|only-auth|only-direct
+  port_start: 40000
+  expose: true
+
+rotation:
+  interval: "5m"                   # поддержка сек/мин/час и cron:*/5 * * * *
+  canary:
+    enabled: true
+    sample_percent: 10
+    warn_fail_rate_percent: 10
+    abort_fail_rate_percent: 20
+    p95_latency_ms: 1500
+    batch_size: 20
+  shadow_canary_default: false
+  blue_green:
+    enabled: true
+  quarantine:
+    window: "15m"
+    alive_threshold_percent: 80
+    error_rate_threshold_percent: 5
+    duration: "30m"
+    exclude_from_export: true
+    exclude_from_random: true
+    exclude_from_geo_proxy: true
+  auto_heal:
+    max_attempts_per_hour: 2
+    backoff_base: "5m"
+    max_consecutive_fail: 3
+
+safety_mode: balanced              # perf|balanced|coverage
+auto_snapshot_on_failure: true
+auto_tune:
+  low_risk_auto_apply: false
+
+countries:
+  default: ["US"]
+  random_enabled: false
+  smart_random:
+    enabled: true
+    ema_alpha: 0.3
+    w_alive: 0.6
+    w_latency: 0.3
+    w_recent: 0.1
+    min_weight: 0.05
+
+geo:
+  mode: adaptive                   # direct|via-tor|adaptive
+  providers_order: ["ip-api", "ipapi", "ipinfo"]
+  cache_ttl: "24h"
+  timeout_s: 2.5
+  retries: 2
+  backoff_base_ms: 500
+  redis_enabled: true
+  concurrency:
+    per_provider_min: 2
+    per_provider_max: 10
+    per_tor_port_max: 2
+    global_cap: 50
+  failover:
+    enabled: true
+    fail_rate_threshold_percent: 5
+    timeout_rate_threshold_percent: 5
+    rtt_p95_ms: 2000
+    cooldown: "5m"
+
+tls:
+  mode: auto                      # auto|disabled|le-http01|le-dns01|custom|self-signed
+  domains: []
+  random_subdomain: false
+  dns_provider: "cloudflare"      # cloudflare|route53|generic
+  dns_api_token: ""               # храните безопасно
+  auto_renew: true
+  fallback_policy_enabled: true
+
+security:
+  admin:
+    require_2fa: false
+  whitelist_panel: []
+  whitelist_direct: []
+  whitelist_export: []
+  creds_policy:
+    length: 16
+    rotate_days: 0                # 0 = не ротировать по расписанию
+  rbac:
+    panic_stop_restricted: true
+    double_confirm_panic_stop: true
+
+network:
+  tor_native_mode: false
+  mac_isolation:
+    enabled: false
+    sanity_guard: true
+    scheduler:
+      enabled: false
+      max_parallel: 3
+  multi_uplink:
+    enabled: false
+    policy: "manual"              # auto|weights|manual
+    uplinks: []                   # [{ifname: eth0, public_ip: 1.2.3.4, weight: 1}]
+
+resources:
+  profile: balanced               # light|balanced|aggressive
+  limits:
+    cpu_quota_percent: 80
+    memory_high_mb_per_node: 256
+    memory_max_mb_per_node: 0     # 0 = не ставить жесткий max
+
+export:
+  presets:
+    - name: "SOCKS5 TXT (auth)"
+      protocol: "socks5"
+      format: "txt"
+      mode: "auth"
+      include_passwords: true
+    - name: "SOCKS5 TXT (direct, no-creds)"
+      protocol: "socks5"
+      format: "txt"
+      mode: "direct"
+      include_passwords: false
+    - name: "SOCKS5 CSV (alive≤500ms)"
+      protocol: "socks5"
+      format: "csv"
+      mode: "both"
+      alive: true
+      latency_lte_ms: 500
+      include_passwords: true
+    - name: "HTTPS JSON (US only)"
+      protocol: "https"
+      format: "json"
+      mode: "auth"
+      countries: ["US"]
+      include_passwords: true
+    - name: "SOCKS5 XLSX (all countries)"
+      protocol: "socks5"
+      format: "xlsx"
+      mode: "auth"
+      include_passwords: true

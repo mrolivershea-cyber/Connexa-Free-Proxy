@@ -1,0 +1,8 @@
+[Unit]
+Description=Connexa Tor Pool Rotate (NEWNYM)
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+ExecStart=/usr/local/bin/poolproxyctl rotate all

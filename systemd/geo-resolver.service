@@ -1,0 +1,10 @@
+[Unit]
+Description=Connexa GEO Resolver
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/connexa
+ExecStart=/opt/connexa/.venv/bin/python api/geo_worker.py
+Restart=on-failure
+RestartSec=5
