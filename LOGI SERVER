@@ -231,4 +231,98 @@ server: uvicorn
 content-length: 21
 content-type: text/plain; charset=utf-8
 
-Internal Server Errorroot@vmi2881987:~# 
+Internal Server Errbash -lc 'sudo tee /opt/Connexa-Free-Proxy/api/admin.py > /dev/null <<'"'"'PY'"'"'v/null <<'"'"'PY'"'"'
+[ВСТАВЬТЕ СЮДА ТОЧНО ВЕСЬ СОДЕРЖИМЫЙ ФАЙЛА ИЗ БЛОКА ВЫШЕ]
+PY
+sudo rm -rf /opt/Connexa-Free-Proxy/api/__pycache__ && sudo systemctl restart connexa-api && sleep 1 && curl -i 127.0.0.1:8080/admin | head -n 10'
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+curl: (7) Failed to connect to 127.0.0.1 port 8080 after 0 ms: Connection refused
+root@vmi2881987:~# sudo journalctl -u connexa-api -n 80 --no-pager
+Nov 02 20:28:06 vmi2881987 python3[111284]:   File "/usr/local/lib/python3.10/dist-packages/uvicorn/server.py", line 71, in serve
+Nov 02 20:28:06 vmi2881987 python3[111284]:     await self._serve(sockets)
+Nov 02 20:28:06 vmi2881987 python3[111284]:   File "/usr/local/lib/python3.10/dist-packages/uvicorn/server.py", line 78, in _serve
+Nov 02 20:28:06 vmi2881987 python3[111284]:     config.load()
+Nov 02 20:28:06 vmi2881987 python3[111284]:   File "/usr/local/lib/python3.10/dist-packages/uvicorn/config.py", line 439, in load
+Nov 02 20:28:06 vmi2881987 python3[111284]:     self.loaded_app = import_from_string(self.app)
+Nov 02 20:28:06 vmi2881987 python3[111284]:   File "/usr/local/lib/python3.10/dist-packages/uvicorn/importer.py", line 19, in import_from_string
+Nov 02 20:28:06 vmi2881987 python3[111284]:     module = importlib.import_module(module_str)
+Nov 02 20:28:06 vmi2881987 python3[111284]:   File "/usr/lib/python3.10/importlib/__init__.py", line 126, in import_module
+Nov 02 20:28:06 vmi2881987 python3[111284]:     return _bootstrap._gcd_import(name[level:], package, level)
+Nov 02 20:28:06 vmi2881987 python3[111284]:   File "<frozen importlib._bootstrap>", line 1050, in _gcd_import
+Nov 02 20:28:06 vmi2881987 python3[111284]:   File "<frozen importlib._bootstrap>", line 1027, in _find_and_load
+Nov 02 20:28:06 vmi2881987 python3[111284]:   File "<frozen importlib._bootstrap>", line 1006, in _find_and_load_unlocked
+Nov 02 20:28:06 vmi2881987 python3[111284]:   File "<frozen importlib._bootstrap>", line 688, in _load_unlocked
+Nov 02 20:28:06 vmi2881987 python3[111284]:   File "<frozen importlib._bootstrap_external>", line 883, in exec_module
+Nov 02 20:28:06 vmi2881987 python3[111284]:   File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+Nov 02 20:28:06 vmi2881987 python3[111284]:   File "/opt/Connexa-Free-Proxy/api/server.py", line 9, in <module>
+Nov 02 20:28:06 vmi2881987 python3[111284]:     from api.admin import router as admin_router
+Nov 02 20:28:06 vmi2881987 python3[111284]:   File "/opt/Connexa-Free-Proxy/api/admin.py", line 1
+Nov 02 20:28:06 vmi2881987 python3[111284]:     [ВСТАВЬТЕ СЮДА ТОЧНО ВЕСЬ СОДЕРЖИМЫЙ ФАЙЛА ИЗ БЛОКА ВЫШЕ]
+Nov 02 20:28:06 vmi2881987 python3[111284]:      ^^^^^^^^^^^^^^^^^^^^^^^^^
+Nov 02 20:28:06 vmi2881987 python3[111284]: SyntaxError: invalid syntax. Perhaps you forgot a comma?
+Nov 02 20:28:06 vmi2881987 systemd[1]: connexa-api.service: Main process exited, code=exited, status=1/FAILURE
+Nov 02 20:28:06 vmi2881987 systemd[1]: connexa-api.service: Failed with result 'exit-code'.
+Nov 02 20:28:07 vmi2881987 systemd[1]: connexa-api.service: Scheduled restart job, restart counter is at 4.
+Nov 02 20:28:07 vmi2881987 systemd[1]: Stopped Connexa Free Proxy API.
+Nov 02 20:28:07 vmi2881987 systemd[1]: Started Connexa Free Proxy API.
+Nov 02 20:28:07 vmi2881987 python3[111287]: Traceback (most recent call last):
+Nov 02 20:28:07 vmi2881987 python3[111287]:   File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+Nov 02 20:28:07 vmi2881987 python3[111287]:     return _run_code(code, main_globals, None,
+Nov 02 20:28:07 vmi2881987 python3[111287]:   File "/usr/lib/python3.10/runpy.py", line 86, in _run_code
+Nov 02 20:28:07 vmi2881987 python3[111287]:     exec(code, run_globals)
+Nov 02 20:28:07 vmi2881987 python3[111287]:   File "/usr/local/lib/python3.10/dist-packages/uvicorn/__main__.py", line 4, in <module>
+Nov 02 20:28:07 vmi2881987 python3[111287]:     uvicorn.main()
+Nov 02 20:28:07 vmi2881987 python3[111287]:   File "/usr/lib/python3/dist-packages/click/core.py", line 1128, in __call__
+Nov 02 20:28:07 vmi2881987 python3[111287]:     return self.main(*args, **kwargs)
+Nov 02 20:28:07 vmi2881987 python3[111287]:   File "/usr/lib/python3/dist-packages/click/core.py", line 1053, in main
+Nov 02 20:28:07 vmi2881987 python3[111287]:     rv = self.invoke(ctx)
+Nov 02 20:28:07 vmi2881987 python3[111287]:   File "/usr/lib/python3/dist-packages/click/core.py", line 1395, in invoke
+Nov 02 20:28:07 vmi2881987 python3[111287]:     return ctx.invoke(self.callback, **ctx.params)
+Nov 02 20:28:07 vmi2881987 python3[111287]:   File "/usr/lib/python3/dist-packages/click/core.py", line 754, in invoke
+Nov 02 20:28:07 vmi2881987 python3[111287]:     return __callback(*args, **kwargs)
+Nov 02 20:28:07 vmi2881987 python3[111287]:   File "/usr/local/lib/python3.10/dist-packages/uvicorn/main.py", line 423, in main
+Nov 02 20:28:07 vmi2881987 python3[111287]:     run(
+Nov 02 20:28:07 vmi2881987 python3[111287]:   File "/usr/local/lib/python3.10/dist-packages/uvicorn/main.py", line 593, in run
+Nov 02 20:28:07 vmi2881987 python3[111287]:     server.run()
+Nov 02 20:28:07 vmi2881987 python3[111287]:   File "/usr/local/lib/python3.10/dist-packages/uvicorn/server.py", line 67, in run
+Nov 02 20:28:07 vmi2881987 python3[111287]:     return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+Nov 02 20:28:07 vmi2881987 python3[111287]:   File "/usr/local/lib/python3.10/dist-packages/uvicorn/_compat.py", line 60, in asyncio_run
+Nov 02 20:28:07 vmi2881987 python3[111287]:     return loop.run_until_complete(main)
+Nov 02 20:28:07 vmi2881987 python3[111287]:   File "uvloop/loop.pyx", line 1518, in uvloop.loop.Loop.run_until_complete
+Nov 02 20:28:07 vmi2881987 python3[111287]:   File "/usr/local/lib/python3.10/dist-packages/uvicorn/server.py", line 71, in serve
+Nov 02 20:28:07 vmi2881987 python3[111287]:     await self._serve(sockets)
+Nov 02 20:28:07 vmi2881987 python3[111287]:   File "/usr/local/lib/python3.10/dist-packages/uvicorn/server.py", line 78, in _serve
+Nov 02 20:28:07 vmi2881987 python3[111287]:     config.load()
+Nov 02 20:28:07 vmi2881987 python3[111287]:   File "/usr/local/lib/python3.10/dist-packages/uvicorn/config.py", line 439, in load
+Nov 02 20:28:07 vmi2881987 python3[111287]:     self.loaded_app = import_from_string(self.app)
+Nov 02 20:28:07 vmi2881987 python3[111287]:   File "/usr/local/lib/python3.10/dist-packages/uvicorn/importer.py", line 19, in import_from_string
+Nov 02 20:28:07 vmi2881987 python3[111287]:     module = importlib.import_module(module_str)
+Nov 02 20:28:07 vmi2881987 python3[111287]:   File "/usr/lib/python3.10/importlib/__init__.py", line 126, in import_module
+Nov 02 20:28:07 vmi2881987 python3[111287]:     return _bootstrap._gcd_import(name[level:], package, level)
+Nov 02 20:28:07 vmi2881987 python3[111287]:   File "<frozen importlib._bootstrap>", line 1050, in _gcd_import
+Nov 02 20:28:07 vmi2881987 python3[111287]:   File "<frozen importlib._bootstrap>", line 1027, in _find_and_load
+Nov 02 20:28:07 vmi2881987 python3[111287]:   File "<frozen importlib._bootstrap>", line 1006, in _find_and_load_unlocked
+Nov 02 20:28:07 vmi2881987 python3[111287]:   File "<frozen importlib._bootstrap>", line 688, in _load_unlocked
+Nov 02 20:28:07 vmi2881987 python3[111287]:   File "<frozen importlib._bootstrap_external>", line 883, in exec_module
+Nov 02 20:28:07 vmi2881987 python3[111287]:   File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+Nov 02 20:28:07 vmi2881987 python3[111287]:   File "/opt/Connexa-Free-Proxy/api/server.py", line 9, in <module>
+Nov 02 20:28:07 vmi2881987 python3[111287]:     from api.admin import router as admin_router
+Nov 02 20:28:07 vmi2881987 python3[111287]:   File "/opt/Connexa-Free-Proxy/api/admin.py", line 1
+Nov 02 20:28:07 vmi2881987 python3[111287]:     [ВСТАВЬТЕ СЮДА ТОЧНО ВЕСЬ СОДЕРЖИМЫЙ ФАЙЛА ИЗ БЛОКА ВЫШЕ]
+Nov 02 20:28:07 vmi2881987 python3[111287]:      ^^^^^^^^^^^^^^^^^^^^^^^^^
+Nov 02 20:28:07 vmi2881987 python3[111287]: SyntaxError: invalid syntax. Perhaps you forgot a comma?
+Nov 02 20:28:07 vmi2881987 systemd[1]: connexa-api.service: Main process exited, code=exited, status=1/FAILURE
+Nov 02 20:28:07 vmi2881987 systemd[1]: connexa-api.service: Failed with result 'exit-code'.
+Nov 02 20:28:08 vmi2881987 systemd[1]: connexa-api.service: Scheduled restart job, restart counter is at 5.
+Nov 02 20:28:08 vmi2881987 systemd[1]: Stopped Connexa Free Proxy API.
+Nov 02 20:28:08 vmi2881987 systemd[1]: connexa-api.service: Start request repeated too quickly.
+Nov 02 20:28:08 vmi2881987 systemd[1]: connexa-api.service: Failed with result 'exit-code'.
+Nov 02 20:28:08 vmi2881987 systemd[1]: Failed to start Connexa Free Proxy API.
+root@vmi2881987:~# curl -i 127.0.0.1:8080/admin | sed -n '1,30p'
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+curl: (7) Failed to connect to 127.0.0.1 port 8080 after 0 ms: Connection refused
+root@vmi2881987:~# 
