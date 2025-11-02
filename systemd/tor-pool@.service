@@ -1,0 +1,16 @@
+[Unit]
+Description=Connexa Tor Node %i
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=debian-tor
+Group=debian-tor
+ExecStart=/usr/bin/tor -f /etc/tor/pool/torrc-%i
+Restart=on-failure
+RestartSec=3
+# cgroups v2 resource governor tuned via drop-ins
+
+[Install]
+WantedBy=multi-user.target

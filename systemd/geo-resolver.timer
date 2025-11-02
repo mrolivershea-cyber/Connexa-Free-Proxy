@@ -1,0 +1,10 @@
+[Unit]
+Description=Connexa GEO Resolver Timer
+
+[Timer]
+OnBootSec=30s
+OnUnitActiveSec=60s
+Unit=geo-resolver.service
+
+[Install]
+WantedBy=timers.target

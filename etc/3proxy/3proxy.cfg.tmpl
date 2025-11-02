@@ -1,0 +1,21 @@
+# 3proxy template for per-node HTTP/SOCKS chaining to local Tor SOCKS
+# Ensures no local DNS (-n); parent = 127.0.0.1:905X
+
+daemon
+# No local DNS resolution in services (-n flag will be set)
+# Parent upstream is Tor SOCKS on localhost per node
+
+# Auth backend per node (example for node N):
+# users userN:CL:{{PASSWORD_N}}
+# auth strong
+# allow *
+# socks -n -a -p41{{NNN}} -i127.0.0.1 -e127.0.0.1
+# parent 1000 socks5 127.0.0.1 905{{N}} "" ""
+
+# No-auth backend per node:
+# auth none
+# allow *
+# socks -n -a -p42{{NNN}} -i127.0.0.1 -e127.0.0.1
+# parent 1000 socks5 127.0.0.1 905{{N}} "" ""
+
+# poolproxyctl will render concrete ports and users for N nodes.

@@ -1,0 +1,13 @@
+CONNEXA FREE PROXY — ФУНКЦИИ И УПРАВЛЕНИЕ (КРАТКИЙ ГАЙД)
+Этот файл суммирует кнопки/тумблеры и отчёты для всех функций (см. панель: Главная, Options, Ops).
+- Глобальные: Start/Stop/Restart, Rotate All, Canary/Shadow-Canary, Blue/Green, Expose/Hide, Protocol, Access Mode,
+  Rotate Interval, Countries (+Random Smart), Export Presets, Whitelist, Options, Tor native mode, GEO On/Off + Resolve,
+  MAC On/Off, Panic Stop, Run Self-Test, Safety Mode.
+- Options: Pool/Rotation, Protocol/Access, TLS (Auto/DNS-01/HTTP-01/Custom/Self-signed + Random subdomain),
+  Security (2FA/RBAC), GEO (providers, Redis, concurrency), Resource Governor (cgroups v2),
+  Safety (Shadow-Canary/Auto Snapshot/Auto-Tune low-risk), Network (Multi-uplink/SNAT, MAC isolation),
+  Snapshots (Create/Restore/...).
+- Ops: Concurrency (Auto/Manual, 429/p95 RTT), Rotation (Canary/Shadow/Blue-Green, Quarantine, Auto-heal),
+  GEO failover, TSDB, Watchdogs/Guardrails (Pause/Resume/Cancel/Panic Stop), Self-Test результаты,
+  MAC events и MAC Check Support.
+Полная развёрнутая версия доступна в ТЗ (v3.9–v3.10.1).
