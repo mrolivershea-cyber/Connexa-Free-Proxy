@@ -20,7 +20,7 @@ require_root() {
 pkg_install() {
   export DEBIAN_FRONTEND=noninteractive
   apt-get update
-  # 3proxy может быть недоступен в некоторых репозиториях — не фатально
+  # 3proxy may be unavailable in some repos — not fatal
   apt-get install -y git python3-pip haproxy tor jq ufw || true
   apt-get install -y 3proxy || true
 }
@@ -72,6 +72,7 @@ install_cli_and_scripts() {
   install -m 0755 "$APP_DIR/cli/poolproxyctl.py" /usr/local/bin/poolproxyctl
   # Service helper scripts
   install -m 0755 "$APP_DIR/scripts/watchdog.sh"      /usr/local/bin/connexa-watchdog || true
+  # Rotation helper (fallback inline if missing in repo)
   if [[ -f "$APP_DIR/scripts/rotation.sh" ]]; then
     install -m 0755 "$APP_DIR/scripts/rotation.sh"   /usr/local/bin/connexa-rotation
   else
@@ -89,11 +90,41 @@ echo "[rotation] done."
 SH
     chmod +x /usr/local/bin/connexa-rotation
   fi
-  install -m 0755 "$APP_DIR/scripts/tls-fallback.sh" /usr/local/bin/connexa-tls-fallback || true
-  install -m 0755 "$APP_DIR/scripts/guardrails.sh"   /usr/local/bin/connexa-guardrails || true
+  # TLS fallback & guardrails: install if present, otherwise place stubs to avoid failing timers
+  if [[ -f "$APP_DIR/scripts/tls-fallback.sh" ]]; then
+    install -m 0755 "$APP_DIR/scripts/tls-fallback.sh" /usr/local/bin/connexa-tls-fallback
+  else
+    printf '#!/usr/bin/env bash\nexit 0\n' > /usr/local/bin/connexa-tls-fallback && chmod +x /usr/local/bin/connexa-tls-fallback
+  fi
+  if [[ -f "$APP_DIR/scripts/guardrails.sh" ]]; then
+    install -m 0755 "$APP_DIR/scripts/guardrails.sh"   /usr/local/bin/connexa-guardrails
+  else
+    printf '#!/usr/bin/env bash\nexit 0\n' > /usr/local/bin/connexa-guardrails && chmod +x /usr/local/bin/connexa-guardrails
+  fi
+}
+
+write_tor_pool_unit() {
+  # Ensure a correct tor-pool@.service template exists
+  cat >/etc/systemd/system/tor-pool@.service <<'UNIT'
+[Unit]
+Description=Tor pool node %i
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=debian-tor
+Group=debian-tor
+ExecStart=/usr/bin/tor -f /etc/tor/pool/torrc-%i
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
+UNIT
 }
 
 install_systemd_units() {
+  # Rotation
   cat >/etc/systemd/system/connexa-rotation.service <<'UNIT'
 [Unit]
 Description=Connexa rotation job (Tor pool soft rotation)
@@ -112,6 +143,7 @@ Unit=connexa-rotation.service
 WantedBy=timers.target
 UNIT
 
+  # Watchdog
   cat >/etc/systemd/system/connexa-watchdog.service <<'UNIT'
 [Unit]
 Description=Connexa watchdog (haproxy/3proxy)
@@ -131,6 +163,7 @@ Unit=connexa-watchdog.service
 WantedBy=timers.target
 UNIT
 
+  # TLS fallback
   cat >/etc/systemd/system/connexa-tls-fallback.service <<'UNIT'
 [Unit]
 Description=Connexa TLS fallback (auto-disable TLS on certificate errors)
@@ -150,6 +183,7 @@ Unit=connexa-tls-fallback.service
 WantedBy=timers.target
 UNIT
 
+  # Guardrails
   cat >/etc/systemd/system/connexa-guardrails.service <<'UNIT'
 [Unit]
 Description=Connexa guardrails (resource usage enforcement)
@@ -201,6 +235,22 @@ bootstrap_services() {
   poolproxyctl expose || true
 }
 
+patch_server_py() {
+  # Fix accidental trailing dot at the end of uvicorn.run(...) line if present
+  local f="$APP_DIR/api/server.py"
+  if [[ -f "$f" ]] && grep -qE 'uvicorn\.run\(.*\)\.[[:space:]]*$' "$f"; then
+    sed -i -E 's/(uvicorn\.run\(.*\))\.[[:space:]]*$/\1/' "$f"
+    echo "[patch] Fixed trailing dot in api/server.py"
+  fi
+}
+
+ufw_allow() {
+  # Open API port if ufw is installed
+  if command -v ufw >/dev/null 2>&1; then
+    ufw allow 8080/tcp || true
+  fi
+}
+
 main() {
   require_root
   pkg_install
@@ -208,8 +258,11 @@ main() {
   python_env
   ensure_conf
   install_cli_and_scripts
+  write_tor_pool_unit
+  patch_server_py
   install_systemd_units
   bootstrap_services
+  ufw_allow
   echo "[install] Done. Health checks:"
   curl -fsS http://127.0.0.1:8080/healthz || true
   curl -fsS http://127.0.0.1:8080/status || true
