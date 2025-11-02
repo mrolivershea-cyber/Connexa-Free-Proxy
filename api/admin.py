@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, HTTPException, status
+from fastapi import APIRouter, Request, HTTPException, status, Depends
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from typing import Optional
@@ -87,7 +87,7 @@ def enable_stats_external(user: str, pwd: str):
     subprocess.run(["systemctl","restart","haproxy"], check=False)
 
 @router.get("/admin")
-def admin_home(creds: Optional[HTTPBasicCredentials] = security):
+def admin_home(creds: Optional[HTTPBasicCredentials] = Depends(security)):
     u, p = read_creds()
     # First run: no Basic, ask to set password
     if u == "admin" and p == "admin":
@@ -133,7 +133,7 @@ async def first_run_post(request: Request):
     return html_page('<h1 class="success">Готово</h1><p>Пароль установлен. Зайдите в <a href="/admin">админку</a> — браузер попросит логин/пароль (realm: Connexa Free Proxy).</p>')
 
 @router.get("/admin/change")
-def admin_change_get(creds: Optional[HTTPBasicCredentials] = security):
+def admin_change_get(creds: Optional[HTTPBasicCredentials] = Depends(security)):
     u, p = read_creds()
     if u == "admin" and p == "admin":
         return RedirectResponse("/admin/first-run", status_code=302)
@@ -151,7 +151,7 @@ def admin_change_get(creds: Optional[HTTPBasicCredentials] = security):
 """)
 
 @router.post("/admin/change")
-async def admin_change_post(request: Request, creds: Optional[HTTPBasicCredentials] = security):
+async def admin_change_post(request: Request, creds: Optional[HTTPBasicCredentials] = Depends(security)):
     u, p = read_creds()
     if u == "admin" and p == "admin":
         return RedirectResponse("/admin/first-run", status_code=302)
