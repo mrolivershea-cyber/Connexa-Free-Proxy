@@ -38,15 +38,18 @@ def html_page(body: str, status_code: int = 200, headers: Optional[dict] = None)
 <title>Connexa Free Proxy</title>
 <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">
 <style>
-body {{ font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 2rem; }}
-.card {{ max-width: 520px; border: 1px solid #ddd; border-radius: 8px; padding: 1.25rem; }}
-h1 {{ font-size: 1.25rem; margin: 0 0 1rem; }}
+body {{ font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 0; padding: 2rem; display: flex; justify-content: center; align-items: center; min-height: 100vh; background-color: #f5f5f5; }}
+.card {{ max-width: 520px; width: 100%; border: 1px solid #ddd; border-radius: 8px; padding: 1.5rem; background-color: white; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }}
+h1 {{ font-size: 1.25rem; margin: 0 0 1rem; text-align: center; }}
 label {{ display: block; margin-top: 0.75rem; }}
-input[type=password] {{ width: 100%; padding: 0.5rem; }}
-button {{ margin-top: 1rem; padding: 0.5rem 0.75rem; }}
+input[type=password] {{ width: 100%; padding: 0.5rem; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }}
+button {{ margin-top: 1rem; padding: 0.5rem 0.75rem; width: 100%; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }}
+button:hover {{ background-color: #0056b3; }}
 .note {{ margin-top:0.5rem; color:#666; font-size: 0.9rem; }}
 .success {{ color: #0a0; }}
 .error {{ color: #a00; }}
+a {{ color: #007bff; text-decoration: none; }}
+a:hover {{ text-decoration: underline; }}
 </style>
 </head>
 <body>
