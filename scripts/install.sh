@@ -30,7 +30,9 @@ pkg_install() {
 fetch_code() {
   mkdir -p "$(dirname "$APP_DIR")"
   if [[ -d "$APP_DIR/.git" ]]; then
-    git -C "$APP_DIR" pull --ff-only
+    git -C "$APP_DIR" fetch --all --prune
+    git -C "$APP_DIR" reset --hard origin/main
+    git -C "$APP_DIR" clean -fd
   else
     git clone "$REPO_URL" "$APP_DIR"
   fi
@@ -100,10 +102,15 @@ PY
 }
 
 ensure_admin_default() {
-  if [[ ! -f "$ADMIN_CREDS_FILE" ]]; then
+  # Force first-run wizard unless PRESERVE_ADMIN_CREDS=1
+  if [[ "${PRESERVE_ADMIN_CREDS:-0}" != "1" ]]; then
     echo "admin:admin" > "$ADMIN_CREDS_FILE"
     chmod 600 "$ADMIN_CREDS_FILE"
-    echo "[admin] default stats login set to admin/admin (stats bound to localhost until changed in /admin)"
+    echo "[admin] forced default admin/admin; first-run wizard enabled"
+  else
+    if [[ ! -f "$ADMIN_CREDS_FILE" ]]; then
+      echo "admin:admin" > "$ADMIN_CREDS_FILE"; chmod 600 "$ADMIN_CREDS_FILE"
+    fi
   fi
 }
 
@@ -148,7 +155,6 @@ UNIT
 
 patch_server_py() {
   local f="$APP_DIR/api/server.py"
-  # Fix accidental trailing dot
   if [[ -f "$f" ]] && grep -qE 'uvicorn\.run\(.*\)\.[[:space:]]*$' "$f"; then
     sed -i -E 's/(uvicorn\.run\(.*\))\.[[:space:]]*$/\1/' "$f"
     echo "[patch] Fixed trailing dot in api/server.py"
@@ -156,99 +162,16 @@ patch_server_py() {
 }
 
 ensure_admin_router_present() {
-  # Ensure admin router exists
-  if [[ ! -f "$APP_DIR/api/admin.py" ]]; then
-    install -d "$APP_DIR/api"
-    cat >"$APP_DIR/api/admin.py" <<'PY'
-from fastapi import APIRouter, Depends, Request, HTTPException, status
-from fastapi.responses import HTMLResponse, RedirectResponse
-from fastapi.security import HTTPBasic, HTTPBasicCredentials
-from pathlib import Path
-import subprocess
-
-router = APIRouter(tags=["admin"])
-security = HTTPBasic()
-
-ADMIN_FILE = Path("/etc/connexa/haproxy-admin")
-HAPROXY_CFG = Path("/etc/haproxy/haproxy.cfg")
-STATS_PORT = 8081
-
-def read_creds() -> tuple[str, str]:
-    if ADMIN_FILE.exists():
-        try:
-            user, pwd = ADMIN_FILE.read_text().strip().split(":", 1)
-            return user, pwd
-        except Exception:
-            pass
-    return "admin", "admin"
-
-def write_creds(user: str, pwd: str):
-    ADMIN_FILE.parent.mkdir(parents=True, exist_ok=True)
-    ADMIN_FILE.write_text(f"{user}:{pwd}")
-    ADMIN_FILE.chmod(0o600)
-
-def require_auth(creds: HTTPBasicCredentials = Depends(security)) -> tuple[str, str]:
-    u, p = read_creds()
-    if creds.username != u or creds.password != p:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Unauthorized",
-            headers={"WWW-Authenticate": "Basic"},
-        )
-    return u, p
-
-def enable_stats_external(user: str, pwd: str):
-    if HAPROXY_CFG.exists():
-        content = HAPROXY_CFG.read_text()
-        lines = []
-        for line in content.splitlines():
-            s = line.strip()
-            if s.startswith("stats auth "):
-                line = f"    stats auth {user}:{pwd}"
-            if s.startswith("bind ") and f":{STATS_PORT}" in s:
-                line = f"    bind 0.0.0.0:{STATS_PORT}"
-            lines.append(line)
-        HAPROXY_CFG.write_text("\n".join(lines) + "\n")
-    subprocess.run(["bash", "-lc", "command -v ufw >/dev/null 2>&1 && ufw allow 8081/tcp || true"], check=False)
-    subprocess.run(["systemctl", "restart", "haproxy"], check=False)
-
-def html_page(body: str) -> HTMLResponse:
-    return HTMLResponse(f"<!doctype html><html><body>{body}</body></html>")
-
-@router.get("/admin")
-def admin_home(userpwd=Depends(require_auth)):
-    u, p = userpwd
-    if u == "admin" and p == "admin":
-        return RedirectResponse(url="/admin/change", status_code=302)
-    return html_page("OK")
-
-@router.get("/admin/change")
-def admin_change_get(userpwd=Depends(require_auth)):
-    return html_page('<form method="POST" action="/admin/change"><input type="password" name="new_password" minlength="6" required><button type="submit">OK</button></form>')
-
-@router.post("/admin/change")
-async def admin_change_post(request: Request, userpwd=Depends(require_auth)):
-    form = await request.form()
-    new_password = (form.get("new_password") or "").strip()
-    if len(new_password) < 6:
-        return html_page("bad password")
-    write_creds("admin", new_password)
-    enable_stats_external("admin", new_password)
-    return html_page("done")
-PY
-    echo "[admin] fallback admin router installed"
-  fi
-  # Ensure server imports admin router
+  # Ensure admin router is wired in server.py; rely on repo file for admin.py
   if ! grep -q "from api.admin import router as admin_router" "$APP_DIR/api/server.py"; then
-    sed -i '1i from api.admin import router as admin_router' "$APP_DIR/api/server.py"
+    sed -i '1i from api.admin import router as admin_router' "$APP_DIR/api/server.py" || true
   fi
   if ! grep -q "app.include_router(admin_router)" "$APP_DIR/api/server.py"; then
-    sed -i '/app\.include_router(ops_router)/a app.include_router(admin_router)' "$APP_DIR/api/server.py"
+    sed -i '/app\.include_router(ops_router)/a app.include_router(admin_router)' "$APP_DIR/api/server.py" || true
   fi
 }
 
 install_systemd_units() {
-  # API service
   cat >"$API_UNIT" <<'UNIT'
 [Unit]
 Description=Connexa Free Proxy API
@@ -278,7 +201,6 @@ install_3proxy_from_source() {
     wget -qO 3proxy.tar.gz https://github.com/z3APA3A/3proxy/archive/refs/tags/${THREEPROXY_VERSION}.tar.gz && \
     tar -xzf 3proxy.tar.gz && cd 3proxy-* && \
     make -f Makefile.Linux >/dev/null 2>&1 || make -f Makefile.Linux ) || true
-  # install binary
   if [[ -f "$tmpd"/3proxy-*/src/3proxy ]]; then
     install -m 0755 "$tmpd"/3proxy-*/src/3proxy /usr/local/sbin/3proxy
   elif [[ -f "$tmpd"/3proxy-*/bin/3proxy ]]; then
@@ -307,7 +229,6 @@ UNIT
 }
 
 haproxy_generate_config() {
-  # Decide mapping: 3proxy (if active) or Tor SOCKS directly
   local active3; active3=$(systemctl is-active 3proxy 2>/dev/null || true)
   local USE_3PROXY="no"; if command -v 3proxy >/dev/null 2>&1 && [[ "$active3" == "active" ]]; then USE_3PROXY="yes"; fi
   eval "$(python3 - <<'PY'
@@ -319,7 +240,6 @@ print('HOST=%s' % ((c.get('external') or {}).get('host') or ''))
 PY
 )"
   : "${POOL_SIZE:=50}"; : "${PORT_START:=40000}"; : "${HOST:=}"
-  # Stats bind: default admin/admin -> localhost, else 0.0.0.0
   local CREDS="admin:admin"; [[ -f "$ADMIN_CREDS_FILE" ]] && CREDS="$(cat "$ADMIN_CREDS_FILE")" || true
   local STATS_BIND="127.0.0.1"; if [[ "$CREDS" != "admin:admin" ]]; then STATS_BIND="0.0.0.0"; fi
   local USER="${CREDS%%:*}"; local PASS="${CREDS#*:}"
@@ -360,7 +280,6 @@ PY
 ufw_allow() {
   if command -v ufw >/dev/null 2>&1; then
     ufw allow 8080/tcp || true
-    # Only open 8081 after password change
     if [[ -f "$ADMIN_CREDS_FILE" && "$(cat "$ADMIN_CREDS_FILE")" != "admin:admin" ]]; then
       ufw allow ${STATS_PORT}/tcp || true
     fi
@@ -411,7 +330,7 @@ main() {
   echo "[install] Done. Health checks:"
   curl -fsS http://127.0.0.1:8080/healthz || true
   curl -fsS http://127.0.0.1:8080/status || true
-  echo "[admin] Панель: http://<ВАШ_IP>:8080/admin (admin/admin — смена обязательна при первом входе)"
+  echo "[admin] Панель: http://<ВАШ_IP>:8080/admin (first run: set new password; stats 8081 opens after change)"
 }
 
 main "$@"
