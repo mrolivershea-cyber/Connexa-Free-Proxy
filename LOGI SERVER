@@ -1,4 +1,4 @@
-Last login: Sun Nov  2 22:34:34 on ttys000
+Last login: Sun Nov  2 22:46:03 on ttys000
 exchange@Mysteriouss-Air ~ % ssh root@195.26.255.18
 root@195.26.255.18's password: 
 Welcome to Ubuntu 22.04.5 LTS (GNU/Linux 5.15.0-160-generic x86_64)
@@ -7,13 +7,13 @@ Welcome to Ubuntu 22.04.5 LTS (GNU/Linux 5.15.0-160-generic x86_64)
  * Management:     https://landscape.canonical.com
  * Support:        https://ubuntu.com/pro
 
- System information as of Sun Nov  2 16:46:13 CET 2025
+ System information as of Sun Nov  2 16:51:19 CET 2025
 
-  System load:           0.58
-  Usage of /:            0.7% of 387.48GB
-  Memory usage:          2%
+  System load:           0.2
+  Usage of /:            1.2% of 387.48GB
+  Memory usage:          15%
   Swap usage:            0%
-  Processes:             235
+  Processes:             221
   Users logged in:       0
   IPv4 address for eth0: 195.26.255.18
   IPv6 address for eth0: 2605:a140:2288:1987::1
@@ -42,10 +42,10 @@ Welcome!
 This server is hosted by Contabo. If you have any questions or need help,
 please don't hesitate to contact us at support@contabo.com.
 
-Last login: Sun Nov  2 16:34:45 2025 from 113.189.109.248
+Last login: Sun Nov  2 16:46:14 2025 from 113.189.109.248
 root@vmi2881987:~# curl -fsSL https://raw.githubusercontent.com/mrolivershea-cyber/Connexa-Free-Proxy/main/scripts/install.sh | sudo bash
-Hit:1 http://security.ubuntu.com/ubuntu jammy-security InRelease
-Hit:2 http://archive.ubuntu.com/ubuntu jammy InRelease     
+Hit:1 http://archive.ubuntu.com/ubuntu jammy InRelease
+Hit:2 http://security.ubuntu.com/ubuntu jammy-security InRelease
 Hit:3 http://archive.ubuntu.com/ubuntu jammy-updates InRelease
 Hit:4 http://archive.ubuntu.com/ubuntu jammy-backports InRelease
 Reading package lists... Done
@@ -63,18 +63,17 @@ Reading package lists... Done
 Building dependency tree... Done
 Reading state information... Done
 E: Unable to locate package 3proxy
-remote: Enumerating objects: 11, done.
-remote: Counting objects: 100% (11/11), done.
-remote: Compressing objects: 100% (7/7), done.
-remote: Total 7 (delta 5), reused 0 (delta 0), pack-reused 0 (from 0)
-Unpacking objects: 100% (7/7), 3.45 KiB | 1.73 MiB/s, done.
+remote: Enumerating objects: 5, done.
+remote: Counting objects: 100% (5/5), done.
+remote: Compressing objects: 100% (3/3), done.
+remote: Total 3 (delta 2), reused 0 (delta 0), pack-reused 0 (from 0)
+Unpacking objects: 100% (3/3), 1.44 KiB | 1.44 MiB/s, done.
 From https://github.com/mrolivershea-cyber/Connexa-Free-Proxy
-   99ff82a..18b7cc1  main       -> origin/main
-Updating 99ff82a..18b7cc1
+   18b7cc1..2dcc0e8  main       -> origin/main
+Updating 18b7cc1..2dcc0e8
 Fast-forward
- LOGI SERVER        | 582 +++++++++--------------------------------------------
- scripts/install.sh |  49 ++++-
- 2 files changed, 148 insertions(+), 483 deletions(-)
+ LOGI SERVER | 125 +++++++++++++-----------------------------------------------
+ 1 file changed, 26 insertions(+), 99 deletions(-)
 Requirement already satisfied: pip in /usr/local/lib/python3.10/dist-packages (25.3)
 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
 Requirement already satisfied: fastapi in /usr/local/lib/python3.10/dist-packages (0.120.4)
@@ -114,8 +113,8 @@ Skipping adding existing rule (v6)
 [install] Done. Health checks:
 {"status":"ok"}{"pool_size":50,"protocol":"socks5","access_mode":"direct","rotation_interval":"5m"}root@vmi2881987:~# API: curl -fsS http://127.0.0.1:8080/healthz && echo OK      API: curl -fsS http://127.0.0.1:8080/healthz && echo OK
 API:: command not found
-root@vmi2881987:~# systemctl list-units 'tor-pool@*.service' — должны быть active (running)
--bash: syntax error near unexpected token `('
-root@vmi2881987:~# ss -lntp | grep :4000 — HAProxy слушает диапазон 40000..(40000+pool_size-1)
--bash: syntax error near unexpected token `('
+root@vmi2881987:~# Tor-пулы: systemctl list-units 'tor-pool@*.service' --no-pager
+Tor-пулы:: command not found
+root@vmi2881987:~# Порты: ss -lntp | grep ':4000'
+Порты:: command not found
 root@vmi2881987:~# 
