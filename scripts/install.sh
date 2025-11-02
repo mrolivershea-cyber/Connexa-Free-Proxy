@@ -40,7 +40,10 @@ python_env() {
 }
 
 ensure_conf() {
-  mkdir -p /etc/connexa /etc/haproxy /etc/3proxy /etc/tor/pool /var/lib/tor/pool
+  mkdir -p /etc/connexa /etc/haproxy /etc/3proxy /etc/tor/pool /var/lib/tor/pool /var/log/tor/pool
+  # permissions for tor data/log
+  chown -R debian-tor:debian-tor /var/lib/tor/pool || true
+  chown -R debian-tor:debian-tor /var/log/tor/pool || true
   if [[ ! -f "$CFG_FILE" ]]; then
     if [[ -f "$APP_DIR/config/config.sample.yaml" ]]; then
       cp "$APP_DIR/config/config.sample.yaml" "$CFG_FILE"
@@ -251,6 +254,49 @@ ufw_allow() {
   fi
 }
 
+haproxy_direct_fallback() {
+  # If 3proxy is missing, directly map external ports to Tor SOCKS (9050+)
+  if command -v 3proxy >/dev/null 2>&1; then
+    echo "[haproxy] 3proxy present, skipping direct fallback."
+    return 0
+  fi
+  echo "[haproxy] 3proxy missing, applying direct HAProxy->Tor fallback..."
+  eval "$(python3 - <<'PY'
+import yaml, sys
+c=yaml.safe_load(open("/etc/connexa/config.yaml"))
+print("POOL_SIZE=%d" % int(c.get("pool_size",50)))
+print("PORT_START=%d" % int((c.get("external") or {}).get("port_start",40000)))
+PY
+)"
+  : "${POOL_SIZE:=50}"
+  : "${PORT_START:=40000}"
+  {
+    echo "global"
+    echo "    daemon"
+    echo "    maxconn 20480"
+    echo ""
+    echo "defaults"
+    echo "    mode tcp"
+    echo "    timeout connect 5s"
+    echo "    timeout client  1m"
+    echo "    timeout server  1m"
+    echo ""
+    for ((i=0; i<POOL_SIZE; i++)); do
+      ext=$((PORT_START+i))
+      tor=$((9050+i))
+      echo "frontend fe_${ext}"
+      echo "    bind *:${ext}"
+      echo "    default_backend be_${tor}"
+      echo ""
+      echo "backend be_${tor}"
+      echo "    server s1 127.0.0.1:${tor} check"
+      echo ""
+    done
+  } > /etc/haproxy/haproxy.cfg
+  systemctl restart haproxy || true
+  echo "[haproxy] fallback applied."
+}
+
 main() {
   require_root
   pkg_install
@@ -263,6 +309,7 @@ main() {
   install_systemd_units
   bootstrap_services
   ufw_allow
+  haproxy_direct_fallback
   echo "[install] Done. Health checks:"
   curl -fsS http://127.0.0.1:8080/healthz || true
   curl -fsS http://127.0.0.1:8080/status || true
