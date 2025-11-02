@@ -116,6 +116,9 @@ def first_run_get():
   <label>Новый пароль
     <input type=\"password\" name=\"new_password\" minlength=\"6\" required>
   </label>
+  <label>Подтвердите пароль
+    <input type=\"password\" name=\"confirm_password\" minlength=\"6\" required>
+  </label>
   <button type=\"submit\">Установить</button>
 </form>
 <p class=\"note\">Требования: минимум 6 символов, без пробелов и двоеточия (:).</p>
@@ -128,6 +131,9 @@ async def first_run_post(request: Request):
         return RedirectResponse("/admin", status_code=302)
     form = await request.form()
     new_password = (form.get("new_password") or "").strip()
+    confirm_password = (form.get("confirm_password") or "").strip()
+    if new_password != confirm_password:
+        return html_page(f'<h1 class="error">Ошибка</h1><p>Пароли не совпадают.</p><p><a href="/admin/first-run">Назад</a></p>')
     err = validate_password(new_password)
     if err:
         return html_page(f'<h1 class="error">Ошибка</h1><p>{err}</p><p><a href="/admin/first-run">Назад</a></p>')
@@ -148,6 +154,9 @@ def admin_change_get(creds: Optional[HTTPBasicCredentials] = Depends(security)):
   <label>Новый пароль
     <input type=\"password\" name=\"new_password\" minlength=\"6\" required>
   </label>
+  <label>Подтвердите пароль
+    <input type=\"password\" name=\"confirm_password\" minlength=\"6\" required>
+  </label>
   <button type=\"submit\">Сменить</button>
 </form>
 <p class=\"note\">Требования: минимум 6 символов, без пробелов и двоеточия (:).</p>
@@ -162,6 +171,9 @@ async def admin_change_post(request: Request, creds: Optional[HTTPBasicCredentia
         unauthorized()
     form = await request.form()
     new_password = (form.get("new_password") or "").strip()
+    confirm_password = (form.get("confirm_password") or "").strip()
+    if new_password != confirm_password:
+        return html_page(f'<h1 class=\"error\">Ошибка</h1><p>Пароли не совпадают.</p><p><a href=\"/admin/change\">Назад</a></p>')
     err = validate_password(new_password)
     if err:
         return html_page(f'<h1 class=\"error\">Ошибка</h1><p>{err}</p><p><a href=\"/admin/change\">Назад</a></p>')
