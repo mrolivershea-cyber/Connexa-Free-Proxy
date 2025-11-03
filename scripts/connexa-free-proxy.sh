@@ -23,10 +23,20 @@ install_deps() {
   apt-get install -y curl jq ca-certificates gnupg lsb-release software-properties-common \
     tor haproxy build-essential python3 python3-venv python3-pip git netcat-openbsd \
     redis-server ufw nftables rsync
-  # 3proxy from upstream (or local build)
+  # 3proxy from source (not available in Ubuntu repos)
   if ! command -v 3proxy >/dev/null 2>&1; then
-    log "Installing 3proxy..."
-    apt-get install -y 3proxy || true
+    log "Installing 3proxy from source..."
+    cd /tmp
+    wget -q https://github.com/3proxy/3proxy/archive/0.9.4.tar.gz -O 3proxy.tar.gz
+    tar xzf 3proxy.tar.gz
+    cd 3proxy-0.9.4
+    make -f Makefile.Linux
+    mkdir -p /usr/local/bin /usr/local/etc/3proxy
+    cp bin/3proxy /usr/local/bin/
+    chmod +x /usr/local/bin/3proxy
+    cd /
+    rm -rf /tmp/3proxy-0.9.4 /tmp/3proxy.tar.gz
+    log "3proxy installed successfully"
   fi
 }
 
