@@ -16,6 +16,7 @@ STATS_PORT = 8081
 REALM = 'Basic realm="Connexa Free Proxy"'
 
 def read_creds() -> tuple[str, str]:
+    """Читает учётные данные из файла или возвращает дефолтные."""
     if ADMIN_FILE.exists():
         try:
             user, pwd = ADMIN_FILE.read_text().strip().split(":", 1)
@@ -24,12 +25,18 @@ def read_creds() -> tuple[str, str]:
             pass
     return "admin", "admin"
 
+def is_default_password() -> bool:
+    """Проверяет, установлен ли дефолтный пароль."""
+    u, p = read_creds()
+    return u == "admin" and p == "admin"
+
 def write_creds(user: str, pwd: str):
     ADMIN_FILE.parent.mkdir(parents=True, exist_ok=True)
     ADMIN_FILE.write_text(f"{user}:{pwd}")
     ADMIN_FILE.chmod(0o600)
 
-def html_page(body: str, status_code: int = 200, headers: Optional[dict] = None) -> HTMLResponse:
+def html_page(body: str, status_code: int = 200) -> HTMLResponse:
+    """Генерирует HTML-страницу с единым стилем."""
     return HTMLResponse(f"""
 <!doctype html>
 <html lang=\"ru\">
@@ -58,7 +65,7 @@ a:hover {{ text-decoration: underline; }}
 </div>
 </body>
 </html>
-""", status_code=status_code, headers=headers or {})
+""", status_code=status_code)
 
 def unauthorized():
     raise HTTPException(
@@ -68,10 +75,15 @@ def unauthorized():
     )
 
 def validate_password(pwd: str) -> Optional[str]:
+    """Проверяет пароль на соответствие требованиям."""
     if len(pwd) < 6: return "Пароль должен быть не короче 6 символов."
     if " " in pwd: return "Пароль не должен содержать пробелы."
     if ":" in pwd: return "Пароль не должен содержать двоеточие (:)."
     return None
+
+def error_page(message: str, back_url: str) -> HTMLResponse:
+    """Генерирует страницу с сообщением об ошибке."""
+    return html_page(f'<h1 class="error">Ошибка</h1><p>{message}</p><p><a href="{back_url}">Назад</a></p>')
 
 def enable_stats_external(user: str, pwd: str):
     # Update stats auth and expose on 0.0.0.0 after password is set
@@ -91,10 +103,9 @@ def enable_stats_external(user: str, pwd: str):
 
 @router.get("/admin")
 def admin_home(creds: Optional[HTTPBasicCredentials] = Depends(security)):
-    u, p = read_creds()
-    # First run: no Basic, ask to set password
-    if u == "admin" and p == "admin":
+    if is_default_password():
         return RedirectResponse("/admin/first-run", status_code=302)
+    u, p = read_creds()
     # After password set: require Basic
     if creds is None or creds.username != u or creds.password != p:
         unauthorized()
@@ -107,8 +118,7 @@ def admin_home(creds: Optional[HTTPBasicCredentials] = Depends(security)):
 
 @router.get("/admin/first-run")
 def first_run_get():
-    u, p = read_creds()
-    if not (u == "admin" and p == "admin"):
+    if not is_default_password():
         return RedirectResponse("/admin", status_code=302)
     return html_page("""
 <h1>Создать пароль администратора</h1>
@@ -126,26 +136,25 @@ def first_run_get():
 
 @router.post("/admin/first-run")
 async def first_run_post(request: Request):
-    u, p = read_creds()
-    if not (u == "admin" and p == "admin"):
+    if not is_default_password():
         return RedirectResponse("/admin", status_code=302)
     form = await request.form()
     new_password = (form.get("new_password") or "").strip()
     confirm_password = (form.get("confirm_password") or "").strip()
     if new_password != confirm_password:
-        return html_page(f'<h1 class="error">Ошибка</h1><p>Пароли не совпадают.</p><p><a href="/admin/first-run">Назад</a></p>')
+        return error_page("Пароли не совпадают.", "/admin/first-run")
     err = validate_password(new_password)
     if err:
-        return html_page(f'<h1 class="error">Ошибка</h1><p>{err}</p><p><a href="/admin/first-run">Назад</a></p>')
+        return error_page(err, "/admin/first-run")
     write_creds("admin", new_password)
     enable_stats_external("admin", new_password)
     return html_page('<h1 class="success">Готово</h1><p>Пароль установлен. Зайдите в <a href="/admin">админку</a> — браузер попросит логин/пароль (realm: Connexa Free Proxy).</p>')
 
 @router.get("/admin/change")
 def admin_change_get(creds: Optional[HTTPBasicCredentials] = Depends(security)):
-    u, p = read_creds()
-    if u == "admin" and p == "admin":
+    if is_default_password():
         return RedirectResponse("/admin/first-run", status_code=302)
+    u, p = read_creds()
     if creds is None or creds.username != u or creds.password != p:
         unauthorized()
     return html_page("""
@@ -164,19 +173,19 @@ def admin_change_get(creds: Optional[HTTPBasicCredentials] = Depends(security)):
 
 @router.post("/admin/change")
 async def admin_change_post(request: Request, creds: Optional[HTTPBasicCredentials] = Depends(security)):
-    u, p = read_creds()
-    if u == "admin" and p == "admin":
+    if is_default_password():
         return RedirectResponse("/admin/first-run", status_code=302)
+    u, p = read_creds()
     if creds is None or creds.username != u or creds.password != p:
         unauthorized()
     form = await request.form()
     new_password = (form.get("new_password") or "").strip()
     confirm_password = (form.get("confirm_password") or "").strip()
     if new_password != confirm_password:
-        return html_page(f'<h1 class=\"error\">Ошибка</h1><p>Пароли не совпадают.</p><p><a href=\"/admin/change\">Назад</a></p>')
+        return error_page("Пароли не совпадают.", "/admin/change")
     err = validate_password(new_password)
     if err:
-        return html_page(f'<h1 class=\"error\">Ошибка</h1><p>{err}</p><p><a href=\"/admin/change\">Назад</a></p>')
+        return error_page(err, "/admin/change")
     write_creds("admin", new_password)
     enable_stats_external("admin", new_password)
     return html_page('<h1 class="success">Готово</h1><p>Пароль обновлён. HAProxy stats доступен на порту 8081. <a href="/admin">Назад</a></p>')
