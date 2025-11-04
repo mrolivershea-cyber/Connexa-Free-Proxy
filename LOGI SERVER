@@ -1,4 +1,4 @@
-Last login: Wed Nov  5 06:04:26 on ttys000
+Last login: Wed Nov  5 06:49:00 on ttys000
 exchange@Mysteriouss-Air ~ % ssh root@195.26.255.18
 root@195.26.255.18's password: 
 Welcome to Ubuntu 22.04.5 LTS (GNU/Linux 5.15.0-160-generic x86_64)
@@ -7,9 +7,9 @@ Welcome to Ubuntu 22.04.5 LTS (GNU/Linux 5.15.0-160-generic x86_64)
  * Management:     https://landscape.canonical.com
  * Support:        https://ubuntu.com/pro
 
- System information as of Wed Nov  5 00:04:53 CET 2025
+ System information as of Wed Nov  5 00:50:43 CET 2025
 
-  System load:           0.02
+  System load:           0.0
   Usage of /:            0.7% of 387.48GB
   Memory usage:          2%
   Swap usage:            0%
@@ -46,23 +46,111 @@ Welcome!
 This server is hosted by Contabo. If you have any questions or need help,
 please don't hesitate to contact us at support@contabo.com.
 
-Last login: Tue Nov  4 13:48:26 2025 from 113.189.109.248
-root@vmi2881987:~# cd /opt/connexa
-wget -O api/admin.py "https://raw.githubusercontent.com/mrolivershea-cyber/Connexa-Free-Proxy/copilot/fix-admin-panel-login/api/admin.py"
---2025-11-05 00:04:58--  https://raw.githubusercontent.com/mrolivershea-cyber/Connexa-Free-Proxy/copilot/fix-admin-panel-login/api/admin.py
-Resolving raw.githubusercontent.com (raw.githubusercontent.com)... 2606:50c0:8000::154, 2606:50c0:8003::154, 2606:50c0:8002::154, ...
-Connecting to raw.githubusercontent.com (raw.githubusercontent.com)|2606:50c0:8000::154|:443... connected.
-HTTP request sent, awaiting response... 200 OK
-Length: 8745 (8.5K) [text/plain]
-Saving to: ‘api/admin.py’
+Last login: Wed Nov  5 00:49:14 2025 from 113.189.109.248
+root@vmi2881987:~# journalctl -u connexa-api -n 100 --no-pager
+Nov 04 21:03:51 vmi2881987 uvicorn[28496]: INFO:     205.210.31.32:60784 - "GET / HTTP/1.1" 404 Not Found
+Nov 04 21:06:02 vmi2881987 uvicorn[28496]: INFO:     45.153.34.14:55342 - "CONNECT google.com%3A443 HTTP/1.1" 404 Not Found
+Nov 04 21:43:55 vmi2881987 uvicorn[28496]: INFO:     204.76.203.18:57688 - "GET / HTTP/1.1" 404 Not Found
+Nov 04 21:57:59 vmi2881987 uvicorn[28496]: INFO:     45.9.168.192:53180 - "POST /FD873AC4-CF86-4FED-84EC-4BD59C6F17A7 HTTP/1.1" 404 Not Found
+Nov 04 22:01:12 vmi2881987 uvicorn[28496]: INFO:     204.76.203.18:32978 - "GET /bins/ HTTP/1.1" 404 Not Found
+Nov 04 22:15:11 vmi2881987 uvicorn[28496]: INFO:     176.65.149.19:39040 - "GET /login HTTP/1.1" 404 Not Found
+Nov 04 22:17:55 vmi2881987 uvicorn[28496]: INFO:     204.76.203.18:37578 - "GET /bin/ HTTP/1.1" 404 Not Found
+Nov 04 22:34:49 vmi2881987 uvicorn[28496]: INFO:     91.224.92.34:53546 - "GET / HTTP/1.1" 404 Not Found
+Nov 04 22:34:49 vmi2881987 uvicorn[28496]: INFO:     91.224.92.34:53552 - "GET /api/contents?type=directory HTTP/1.1" 404 Not Found
+Nov 04 22:37:44 vmi2881987 uvicorn[28496]: INFO:     204.76.203.18:55628 - "GET /backup/ HTTP/1.1" 404 Not Found
+Nov 04 22:38:34 vmi2881987 uvicorn[28496]: INFO:     204.76.203.219:45240 - "GET / HTTP/1.1" 404 Not Found
+Nov 04 22:40:54 vmi2881987 uvicorn[28496]: INFO:     59.183.112.216:49306 - "GET / HTTP/1.1" 404 Not Found
+Nov 04 23:33:43 vmi2881987 uvicorn[28496]: INFO:     79.124.40.174:42090 - "POST /vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php HTTP/1.1" 404 Not Found
+Nov 04 23:43:14 vmi2881987 uvicorn[28496]: INFO:     79.124.40.174:44886 - "GET /vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php HTTP/1.1" 404 Not Found
+Nov 04 23:50:55 vmi2881987 uvicorn[28496]: INFO:     204.76.203.212:44722 - "GET / HTTP/1.1" 404 Not Found
+Nov 04 23:52:55 vmi2881987 uvicorn[28496]: INFO:     79.124.40.174:42780 - "GET /?XDEBUG_SESSION_START=phpstorm HTTP/1.1" 404 Not Found
+Nov 04 23:54:59 vmi2881987 uvicorn[28496]: INFO:     20.14.75.6:38812 - "GET /actuator/health HTTP/1.1" 404 Not Found
+Nov 04 23:55:35 vmi2881987 uvicorn[28496]: WARNING:  Invalid HTTP request received.
+Nov 04 23:55:36 vmi2881987 uvicorn[28496]: WARNING:  Invalid HTTP request received.
+Nov 04 23:57:52 vmi2881987 uvicorn[28496]: INFO:     79.124.40.174:49498 - "GET /console/ HTTP/1.1" 404 Not Found
+Nov 05 00:01:35 vmi2881987 uvicorn[28496]: INFO:     79.124.40.174:47102 - "GET /_ignition/execute-solution HTTP/1.1" 404 Not Found
+Nov 05 00:05:18 vmi2881987 systemd[1]: Stopping Connexa Free Proxy API Server...
+Nov 05 00:05:18 vmi2881987 uvicorn[28496]: INFO:     Shutting down
+Nov 05 00:05:18 vmi2881987 uvicorn[28496]: INFO:     Waiting for application shutdown.
+Nov 05 00:05:18 vmi2881987 uvicorn[28496]: INFO:     Application shutdown complete.
+Nov 05 00:05:18 vmi2881987 uvicorn[28496]: INFO:     Finished server process [28496]
+Nov 05 00:05:18 vmi2881987 systemd[1]: connexa-api.service: Deactivated successfully.
+Nov 05 00:05:18 vmi2881987 systemd[1]: Stopped Connexa Free Proxy API Server.
+Nov 05 00:05:18 vmi2881987 systemd[1]: connexa-api.service: Consumed 2min 18.978s CPU time.
+Nov 05 00:05:18 vmi2881987 systemd[1]: Started Connexa Free Proxy API Server.
+Nov 05 00:05:19 vmi2881987 uvicorn[34901]: INFO:     Started server process [34901]
+Nov 05 00:05:19 vmi2881987 uvicorn[34901]: INFO:     Waiting for application startup.
+Nov 05 00:05:19 vmi2881987 uvicorn[34901]: INFO:     Application startup complete.
+Nov 05 00:05:19 vmi2881987 uvicorn[34901]: INFO:     Uvicorn running on http://0.0.0.0:8080 (Press CTRL+C to quit)
+Nov 05 00:05:48 vmi2881987 uvicorn[34901]: INFO:     127.0.0.1:60458 - "GET /admin/first-run HTTP/1.1" 200 OK
+Nov 05 00:06:02 vmi2881987 uvicorn[34901]: INFO:     113.189.109.248:60113 - "GET /admin/first-run HTTP/1.1" 200 OK
+Nov 05 00:06:08 vmi2881987 uvicorn[34901]: INFO:     104.28.68.157:47676 - "GET /apple-touch-icon.png HTTP/1.1" 404 Not Found
+Nov 05 00:06:08 vmi2881987 uvicorn[34901]: INFO:     104.28.68.157:47857 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+Nov 05 00:06:08 vmi2881987 uvicorn[34901]: INFO:     104.28.68.157:47750 - "GET /apple-touch-icon-precomposed.png HTTP/1.1" 404 Not Found
+Nov 05 00:06:09 vmi2881987 uvicorn[34901]: INFO:     104.28.68.165:22084 - "GET /admin/first-run HTTP/1.1" 200 OK
+Nov 05 00:06:21 vmi2881987 uvicorn[34901]: INFO:     104.28.68.165:22207 - "POST /admin/first-run HTTP/1.1" 500 Internal Server Error
+Nov 05 00:06:21 vmi2881987 uvicorn[34901]: ERROR:    Exception in ASGI application
+Nov 05 00:06:21 vmi2881987 uvicorn[34901]: Traceback (most recent call last):
+Nov 05 00:06:21 vmi2881987 uvicorn[34901]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/uvicorn/protocols/http/h11_impl.py", line 403, in run_asgi
+Nov 05 00:06:21 vmi2881987 uvicorn[34901]:     result = await app(  # type: ignore[func-returns-value]
+Nov 05 00:06:21 vmi2881987 uvicorn[34901]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+Nov 05 00:06:21 vmi2881987 uvicorn[34901]:     return await self.app(scope, receive, send)
+Nov 05 00:06:21 vmi2881987 uvicorn[34901]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/fastapi/applications.py", line 1134, in __call__
+Nov 05 00:06:21 vmi2881987 uvicorn[34901]:     await super().__call__(scope, receive, send)
+Nov 05 00:06:21 vmi2881987 uvicorn[34901]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/applications.py", line 113, in __call__
+Nov 05 00:06:21 vmi2881987 uvicorn[34901]:     await self.middleware_stack(scope, receive, send)
+Nov 05 00:06:21 vmi2881987 uvicorn[34901]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/middleware/errors.py", line 186, in __call__
+Nov 05 00:06:21 vmi2881987 uvicorn[34901]:     raise exc
+Nov 05 00:06:21 vmi2881987 uvicorn[34901]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/middleware/errors.py", line 164, in __call__
+Nov 05 00:06:21 vmi2881987 uvicorn[34901]:     await self.app(scope, receive, _send)
+Nov 05 00:06:21 vmi2881987 uvicorn[34901]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+Nov 05 00:06:21 vmi2881987 uvicorn[34901]:     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+Nov 05 00:06:21 vmi2881987 uvicorn[34901]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+Nov 05 00:06:21 vmi2881987 uvicorn[34901]:     raise exc
+Nov 05 00:06:21 vmi2881987 uvicorn[34901]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+Nov 05 00:06:21 vmi2881987 uvicorn[34901]:     await app(scope, receive, sender)
+Nov 05 00:06:21 vmi2881987 uvicorn[34901]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+Nov 05 00:06:21 vmi2881987 uvicorn[34901]:     await self.app(scope, receive, send)
+Nov 05 00:06:21 vmi2881987 uvicorn[34901]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/routing.py", line 716, in __call__
+Nov 05 00:06:21 vmi2881987 uvicorn[34901]:     await self.middleware_stack(scope, receive, send)
+Nov 05 00:06:21 vmi2881987 uvicorn[34901]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/routing.py", line 736, in app
+Nov 05 00:06:21 vmi2881987 uvicorn[34901]:     await route.handle(scope, receive, send)
+Nov 05 00:06:21 vmi2881987 uvicorn[34901]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/routing.py", line 290, in handle
+Nov 05 00:06:21 vmi2881987 uvicorn[34901]:     await self.app(scope, receive, send)
+Nov 05 00:06:21 vmi2881987 uvicorn[34901]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/fastapi/routing.py", line 125, in app
+Nov 05 00:06:21 vmi2881987 uvicorn[34901]:     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+Nov 05 00:06:21 vmi2881987 uvicorn[34901]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+Nov 05 00:06:21 vmi2881987 uvicorn[34901]:     raise exc
+Nov 05 00:06:21 vmi2881987 uvicorn[34901]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+Nov 05 00:06:21 vmi2881987 uvicorn[34901]:     await app(scope, receive, sender)
+Nov 05 00:06:21 vmi2881987 uvicorn[34901]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/fastapi/routing.py", line 111, in app
+Nov 05 00:06:21 vmi2881987 uvicorn[34901]:     response = await f(request)
+Nov 05 00:06:21 vmi2881987 uvicorn[34901]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/fastapi/routing.py", line 391, in app
+Nov 05 00:06:21 vmi2881987 uvicorn[34901]:     raw_response = await run_endpoint_function(
+Nov 05 00:06:21 vmi2881987 uvicorn[34901]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/fastapi/routing.py", line 290, in run_endpoint_function
+Nov 05 00:06:21 vmi2881987 uvicorn[34901]:     return await dependant.call(**values)
+Nov 05 00:06:21 vmi2881987 uvicorn[34901]:   File "/opt/connexa/api/admin.py", line 141, in first_run_post
+Nov 05 00:06:21 vmi2881987 uvicorn[34901]:     form = await request.form()
+Nov 05 00:06:21 vmi2881987 uvicorn[34901]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/requests.py", line 262, in _get_form
+Nov 05 00:06:21 vmi2881987 uvicorn[34901]:     assert parse_options_header is not None, (
+Nov 05 00:06:21 vmi2881987 uvicorn[34901]: AssertionError: The `python-multipart` library must be installed to use form parsing.
+Nov 05 00:10:36 vmi2881987 uvicorn[34901]: INFO:     79.124.40.174:58918 - "GET / HTTP/1.1" 404 Not Found
+Nov 05 00:20:11 vmi2881987 uvicorn[34901]: INFO:     79.124.40.174:42878 - "GET / HTTP/1.1" 404 Not Found
+Nov 05 00:23:27 vmi2881987 uvicorn[34901]: INFO:     79.124.40.174:34102 - "GET /actuator/gateway/routes HTTP/1.1" 404 Not Found
+Nov 05 00:26:25 vmi2881987 uvicorn[34901]: INFO:     176.65.149.19:45584 - "GET /login HTTP/1.1" 404 Not Found
+Nov 05 00:29:29 vmi2881987 uvicorn[34901]: INFO:     79.124.40.174:54060 - "GET /geoserver HTTP/1.1" 404 Not Found
+Nov 05 00:41:55 vmi2881987 uvicorn[34901]: INFO:     204.76.203.219:50682 - "GET / HTTP/1.1" 404 Not Found
+Nov 05 00:49:16 vmi2881987 systemd[1]: Stopping Connexa Free Proxy API Server...
+Nov 05 00:49:16 vmi2881987 uvicorn[34901]: INFO:     Shutting down
+Nov 05 00:49:16 vmi2881987 uvicorn[34901]: INFO:     Waiting for application shutdown.
+Nov 05 00:49:16 vmi2881987 uvicorn[34901]: INFO:     Application shutdown complete.
+Nov 05 00:49:16 vmi2881987 uvicorn[34901]: INFO:     Finished server process [34901]
+Nov 05 00:49:16 vmi2881987 systemd[1]: connexa-api.service: Deactivated successfully.
+Nov 05 00:49:16 vmi2881987 systemd[1]: Stopped Connexa Free Proxy API Server.
+Nov 05 00:49:16 vmi2881987 systemd[1]: connexa-api.service: Consumed 10.808s CPU time.
+root@vmi2881987:~# # Проверьте, что файл обновился
+grep -c "confirm_password" /opt/connexa/api/admin.py
 
-api/admin.py        100%[===================>]   8.54K  --.-KB/s    in 0.001s  
-
-2025-11-05 00:04:58 (10.7 MB/s) - ‘api/admin.py’ saved [8745/8745]
-
-root@vmi2881987:/opt/connexa# grep -c "type=\"password\"" api/admin.py
-0
-root@vmi2881987:/opt/connexa# systemctl restart connexa-api
-root@vmi2881987:/opt/connexa# curl -s http://localhost:8080/admin/first-run | grep -c "Подтвердите пароль"
-1
-root@vmi2881987:/opt/connexa# 
+# Должно вывести: 6
+6
+root@vmi2881987:~# 
