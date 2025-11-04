@@ -1,6 +1,4 @@
-Last login: Tue Nov  4 19:06:31 on ttys000
-exchange@Mysteriouss-Air ~ % ЗкщчнПщщв124
-zsh: command not found: ЗкщчнПщщв124
+Last login: Tue Nov  4 19:26:48 on ttys000
 exchange@Mysteriouss-Air ~ % ssh root@195.26.255.18
 root@195.26.255.18's password: 
 Welcome to Ubuntu 22.04.5 LTS (GNU/Linux 5.15.0-160-generic x86_64)
@@ -9,13 +7,13 @@ Welcome to Ubuntu 22.04.5 LTS (GNU/Linux 5.15.0-160-generic x86_64)
  * Management:     https://landscape.canonical.com
  * Support:        https://ubuntu.com/pro
 
- System information as of Tue Nov  4 13:12:16 CET 2025
+ System information as of Tue Nov  4 13:32:05 CET 2025
 
   System load:           0.0
   Usage of /:            0.7% of 387.48GB
   Memory usage:          2%
   Swap usage:            0%
-  Processes:             155
+  Processes:             157
   Users logged in:       0
   IPv4 address for eth0: 195.26.255.18
   IPv6 address for eth0: 2605:a140:2288:1987::1
@@ -48,132 +46,58 @@ Welcome!
 This server is hosted by Contabo. If you have any questions or need help,
 please don't hesitate to contact us at support@contabo.com.
 
-Last login: Tue Nov  4 13:06:46 2025 from 113.189.109.248
-root@vmi2881987:~# rm -rf /opt/connexa
-root@vmi2881987:~# curl -fsSL "https://raw.githubusercontent.com/mrolivershea-cyber/Connexa-Free-Proxy/copilot/fix-admin-panel-login/scripts/connexa-free-proxy.sh?$(date +%s)" | sudo DEBIAN_FRONTEND=noninteractive UCF_FORCE_CONFOLD=1 NEEDRESTART_MODE=a bash
-[install] Updating packages...
-Hit:1 http://archive.ubuntu.com/ubuntu jammy InRelease
-Hit:2 http://security.ubuntu.com/ubuntu jammy-security InRelease
-Hit:3 http://archive.ubuntu.com/ubuntu jammy-updates InRelease
-Hit:4 http://archive.ubuntu.com/ubuntu jammy-backports InRelease
-Reading package lists... Done
-Reading package lists... Done
-Building dependency tree... Done
-Reading state information... Done
-build-essential is already the newest version (12.9ubuntu3).
-lsb-release is already the newest version (11.1.0ubuntu4).
-netcat-openbsd is already the newest version (1.218-4ubuntu1).
-tor is already the newest version (0.4.6.10-1).
-ca-certificates is already the newest version (20240203~22.04.1).
-curl is already the newest version (7.81.0-1ubuntu1.21).
-git is already the newest version (1:2.34.1-1ubuntu1.15).
-gnupg is already the newest version (2.2.27-3ubuntu2.4).
-haproxy is already the newest version (2.4.24-0ubuntu0.22.04.3).
-jq is already the newest version (1.6-2.1ubuntu3.1).
-nftables is already the newest version (1.0.2-1ubuntu3).
-python3 is already the newest version (3.10.6-1~22.04.1).
-rsync is already the newest version (3.2.7-0ubuntu0.22.04.4).
-software-properties-common is already the newest version (0.99.22.9).
-ufw is already the newest version (0.36.1-4ubuntu0.1).
-python3-pip is already the newest version (22.0.2+dfsg-1ubuntu0.7).
-python3-venv is already the newest version (3.10.6-1~22.04.1).
-redis-server is already the newest version (5:6.0.16-1ubuntu1.1).
-0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
-[install] Downloading Connexa Free Proxy...
-[install] Files copied to /opt/connexa
-[install] Installing systemd units...
-[install] Creating connexa-api.service...
-[install] Auto-start enabled for connexa-api.service
-[install] Setting up Python venv...
-Requirement already satisfied: pip in /opt/connexa/.venv/lib/python3.10/site-packages (22.0.2)
-Collecting pip
-  Using cached pip-25.3-py3-none-any.whl (1.8 MB)
-Installing collected packages: pip
-  Attempting uninstall: pip
-    Found existing installation: pip 22.0.2
-    Uninstalling pip-22.0.2:
-      Successfully uninstalled pip-22.0.2
-Successfully installed pip-25.3
-Collecting fastapi
-  Using cached fastapi-0.121.0-py3-none-any.whl.metadata (28 kB)
-Collecting uvicorn
-  Using cached uvicorn-0.38.0-py3-none-any.whl.metadata (6.8 kB)
-Collecting click
-  Using cached click-8.3.0-py3-none-any.whl.metadata (2.6 kB)
-Collecting pyyaml
-  Using cached pyyaml-6.0.3-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.4 kB)
-Collecting redis
-  Using cached redis-7.0.1-py3-none-any.whl.metadata (12 kB)
-Collecting starlette<0.50.0,>=0.40.0 (from fastapi)
-  Using cached starlette-0.49.3-py3-none-any.whl.metadata (6.4 kB)
-Collecting pydantic!=1.8,!=1.8.1,!=2.0.0,!=2.0.1,!=2.1.0,<3.0.0,>=1.7.4 (from fastapi)
-  Using cached pydantic-2.12.3-py3-none-any.whl.metadata (87 kB)
-Collecting typing-extensions>=4.8.0 (from fastapi)
-  Using cached typing_extensions-4.15.0-py3-none-any.whl.metadata (3.3 kB)
-Collecting annotated-doc>=0.0.2 (from fastapi)
-  Using cached annotated_doc-0.0.3-py3-none-any.whl.metadata (6.6 kB)
-Collecting annotated-types>=0.6.0 (from pydantic!=1.8,!=1.8.1,!=2.0.0,!=2.0.1,!=2.1.0,<3.0.0,>=1.7.4->fastapi)
-  Using cached annotated_types-0.7.0-py3-none-any.whl.metadata (15 kB)
-Collecting pydantic-core==2.41.4 (from pydantic!=1.8,!=1.8.1,!=2.0.0,!=2.0.1,!=2.1.0,<3.0.0,>=1.7.4->fastapi)
-  Using cached pydantic_core-2.41.4-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (7.3 kB)
-Collecting typing-inspection>=0.4.2 (from pydantic!=1.8,!=1.8.1,!=2.0.0,!=2.0.1,!=2.1.0,<3.0.0,>=1.7.4->fastapi)
-  Using cached typing_inspection-0.4.2-py3-none-any.whl.metadata (2.6 kB)
-Collecting anyio<5,>=3.6.2 (from starlette<0.50.0,>=0.40.0->fastapi)
-  Using cached anyio-4.11.0-py3-none-any.whl.metadata (4.1 kB)
-Collecting exceptiongroup>=1.0.2 (from anyio<5,>=3.6.2->starlette<0.50.0,>=0.40.0->fastapi)
-  Using cached exceptiongroup-1.3.0-py3-none-any.whl.metadata (6.7 kB)
-Collecting idna>=2.8 (from anyio<5,>=3.6.2->starlette<0.50.0,>=0.40.0->fastapi)
-  Using cached idna-3.11-py3-none-any.whl.metadata (8.4 kB)
-Collecting sniffio>=1.1 (from anyio<5,>=3.6.2->starlette<0.50.0,>=0.40.0->fastapi)
-  Using cached sniffio-1.3.1-py3-none-any.whl.metadata (3.9 kB)
-Collecting h11>=0.8 (from uvicorn)
-  Using cached h11-0.16.0-py3-none-any.whl.metadata (8.3 kB)
-Collecting async-timeout>=4.0.3 (from redis)
-  Using cached async_timeout-5.0.1-py3-none-any.whl.metadata (5.1 kB)
-Using cached fastapi-0.121.0-py3-none-any.whl (109 kB)
-Using cached pydantic-2.12.3-py3-none-any.whl (462 kB)
-Using cached pydantic_core-2.41.4-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.1 MB)
-Using cached starlette-0.49.3-py3-none-any.whl (74 kB)
-Using cached anyio-4.11.0-py3-none-any.whl (109 kB)
-Using cached uvicorn-0.38.0-py3-none-any.whl (68 kB)
-Using cached click-8.3.0-py3-none-any.whl (107 kB)
-Using cached pyyaml-6.0.3-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (770 kB)
-Using cached redis-7.0.1-py3-none-any.whl (339 kB)
-Using cached annotated_doc-0.0.3-py3-none-any.whl (5.5 kB)
-Using cached annotated_types-0.7.0-py3-none-any.whl (13 kB)
-Using cached async_timeout-5.0.1-py3-none-any.whl (6.2 kB)
-Using cached exceptiongroup-1.3.0-py3-none-any.whl (16 kB)
-Using cached h11-0.16.0-py3-none-any.whl (37 kB)
-Using cached idna-3.11-py3-none-any.whl (71 kB)
-Using cached sniffio-1.3.1-py3-none-any.whl (10 kB)
-Using cached typing_extensions-4.15.0-py3-none-any.whl (44 kB)
-Using cached typing_inspection-0.4.2-py3-none-any.whl (14 kB)
-Installing collected packages: typing-extensions, sniffio, pyyaml, idna, h11, click, async-timeout, annotated-types, annotated-doc, uvicorn, typing-inspection, redis, pydantic-core, exceptiongroup, pydantic, anyio, starlette, fastapi
-Successfully installed annotated-doc-0.0.3 annotated-types-0.7.0 anyio-4.11.0 async-timeout-5.0.1 click-8.3.0 exceptiongroup-1.3.0 fastapi-0.121.0 h11-0.16.0 idna-3.11 pydantic-2.12.3 pydantic-core-2.41.4 pyyaml-6.0.3 redis-7.0.1 sniffio-1.3.1 starlette-0.49.3 typing-extensions-4.15.0 typing-inspection-0.4.2 uvicorn-0.38.0
-[install] Post-install checks...
-{
-  "pool_size": 50,
-  "protocol": "socks5",
-  "access_mode": "both",
-  "rotation_interval": "5m",
-  "expose": true
-}
-[install] Starting connexa-api.service...
-
-=== Install complete ===
-Config: /etc/connexa/config.yaml
-CLI:    poolproxyctl help
-API:    http://your-server-ip:8080/admin (автозапуск включён)
-
-Статус API: systemctl status connexa-api
-Логи API:   journalctl -u connexa-api -f
+Last login: Tue Nov  4 13:27:01 2025 from 113.189.109.248
+root@vmi2881987:~# journalctl -u connexa-api -n 50 --no-pager
+Nov 04 13:27:12 vmi2881987 uvicorn[28194]: INFO:     172.225.56.34:57033 - "GET /apple-touch-icon.png HTTP/1.1" 404 Not Found
+Nov 04 13:27:15 vmi2881987 uvicorn[28194]: INFO:     172.225.56.18:52605 - "GET /admin/ HTTP/1.1" 307 Temporary Redirect
+Nov 04 13:27:15 vmi2881987 uvicorn[28194]: INFO:     172.225.56.18:52605 - "GET /admin HTTP/1.1" 302 Found
+Nov 04 13:27:15 vmi2881987 uvicorn[28194]: INFO:     172.225.56.18:52605 - "GET /admin/first-run HTTP/1.1" 200 OK
+Nov 04 13:27:28 vmi2881987 uvicorn[28194]: INFO:     113.189.109.248:57433 - "POST /admin/first-run HTTP/1.1" 500 Internal Server Error
+Nov 04 13:27:28 vmi2881987 uvicorn[28194]: ERROR:    Exception in ASGI application
+Nov 04 13:27:28 vmi2881987 uvicorn[28194]: Traceback (most recent call last):
+Nov 04 13:27:28 vmi2881987 uvicorn[28194]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/uvicorn/protocols/http/h11_impl.py", line 403, in run_asgi
+Nov 04 13:27:28 vmi2881987 uvicorn[28194]:     result = await app(  # type: ignore[func-returns-value]
+Nov 04 13:27:28 vmi2881987 uvicorn[28194]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+Nov 04 13:27:28 vmi2881987 uvicorn[28194]:     return await self.app(scope, receive, send)
+Nov 04 13:27:28 vmi2881987 uvicorn[28194]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/fastapi/applications.py", line 1134, in __call__
+Nov 04 13:27:28 vmi2881987 uvicorn[28194]:     await super().__call__(scope, receive, send)
+Nov 04 13:27:28 vmi2881987 uvicorn[28194]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/applications.py", line 113, in __call__
+Nov 04 13:27:28 vmi2881987 uvicorn[28194]:     await self.middleware_stack(scope, receive, send)
+Nov 04 13:27:28 vmi2881987 uvicorn[28194]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/middleware/errors.py", line 186, in __call__
+Nov 04 13:27:28 vmi2881987 uvicorn[28194]:     raise exc
+Nov 04 13:27:28 vmi2881987 uvicorn[28194]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/middleware/errors.py", line 164, in __call__
+Nov 04 13:27:28 vmi2881987 uvicorn[28194]:     await self.app(scope, receive, _send)
+Nov 04 13:27:28 vmi2881987 uvicorn[28194]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+Nov 04 13:27:28 vmi2881987 uvicorn[28194]:     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+Nov 04 13:27:28 vmi2881987 uvicorn[28194]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+Nov 04 13:27:28 vmi2881987 uvicorn[28194]:     raise exc
+Nov 04 13:27:28 vmi2881987 uvicorn[28194]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+Nov 04 13:27:28 vmi2881987 uvicorn[28194]:     await app(scope, receive, sender)
+Nov 04 13:27:28 vmi2881987 uvicorn[28194]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+Nov 04 13:27:28 vmi2881987 uvicorn[28194]:     await self.app(scope, receive, send)
+Nov 04 13:27:28 vmi2881987 uvicorn[28194]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/routing.py", line 716, in __call__
+Nov 04 13:27:28 vmi2881987 uvicorn[28194]:     await self.middleware_stack(scope, receive, send)
+Nov 04 13:27:28 vmi2881987 uvicorn[28194]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/routing.py", line 736, in app
+Nov 04 13:27:28 vmi2881987 uvicorn[28194]:     await route.handle(scope, receive, send)
+Nov 04 13:27:28 vmi2881987 uvicorn[28194]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/routing.py", line 290, in handle
+Nov 04 13:27:28 vmi2881987 uvicorn[28194]:     await self.app(scope, receive, send)
+Nov 04 13:27:28 vmi2881987 uvicorn[28194]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/fastapi/routing.py", line 125, in app
+Nov 04 13:27:28 vmi2881987 uvicorn[28194]:     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+Nov 04 13:27:28 vmi2881987 uvicorn[28194]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+Nov 04 13:27:28 vmi2881987 uvicorn[28194]:     raise exc
+Nov 04 13:27:28 vmi2881987 uvicorn[28194]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+Nov 04 13:27:28 vmi2881987 uvicorn[28194]:     await app(scope, receive, sender)
+Nov 04 13:27:28 vmi2881987 uvicorn[28194]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/fastapi/routing.py", line 111, in app
+Nov 04 13:27:28 vmi2881987 uvicorn[28194]:     response = await f(request)
+Nov 04 13:27:28 vmi2881987 uvicorn[28194]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/fastapi/routing.py", line 391, in app
+Nov 04 13:27:28 vmi2881987 uvicorn[28194]:     raw_response = await run_endpoint_function(
+Nov 04 13:27:28 vmi2881987 uvicorn[28194]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/fastapi/routing.py", line 290, in run_endpoint_function
+Nov 04 13:27:28 vmi2881987 uvicorn[28194]:     return await dependant.call(**values)
+Nov 04 13:27:28 vmi2881987 uvicorn[28194]:   File "/opt/connexa/api/admin.py", line 141, in first_run_post
+Nov 04 13:27:28 vmi2881987 uvicorn[28194]:     form = await request.form()
+Nov 04 13:27:28 vmi2881987 uvicorn[28194]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/requests.py", line 262, in _get_form
+Nov 04 13:27:28 vmi2881987 uvicorn[28194]:     assert parse_options_header is not None, (
+Nov 04 13:27:28 vmi2881987 uvicorn[28194]: AssertionError: The `python-multipart` library must be installed to use form parsing.
 root@vmi2881987:~# grep -c "Подтвердите пароль" /opt/connexa/api/admin.py
-2
-root@vmi2881987:~# # После завершения установки проверьте количество полей
-grep -c "Подтвердите пароль" /opt/connexa/api/admin.py
-2
-root@vmi2881987:~# systemctl restart connexa-api
-root@vmi2881987:~# # После завершения установки проверьте количество полей
-grep -c "Подтвердите пароль" /opt/connexa/api/admin.py
 2
 root@vmi2881987:~# 
