@@ -1,4 +1,4 @@
-Last login: Tue Nov  4 19:31:53 on ttys000
+Last login: Wed Nov  5 06:04:26 on ttys000
 exchange@Mysteriouss-Air ~ % ssh root@195.26.255.18
 root@195.26.255.18's password: 
 Welcome to Ubuntu 22.04.5 LTS (GNU/Linux 5.15.0-160-generic x86_64)
@@ -7,9 +7,9 @@ Welcome to Ubuntu 22.04.5 LTS (GNU/Linux 5.15.0-160-generic x86_64)
  * Management:     https://landscape.canonical.com
  * Support:        https://ubuntu.com/pro
 
- System information as of Tue Nov  4 13:35:31 CET 2025
+ System information as of Wed Nov  5 00:04:53 CET 2025
 
-  System load:           0.0
+  System load:           0.02
   Usage of /:            0.7% of 387.48GB
   Memory usage:          2%
   Swap usage:            0%
@@ -46,26 +46,23 @@ Welcome!
 This server is hosted by Contabo. If you have any questions or need help,
 please don't hesitate to contact us at support@contabo.com.
 
-Last login: Tue Nov  4 13:32:07 2025 from 113.189.109.248
-root@vmi2881987:~# journalctl -u connexa-api -n 100 --no-pager | tail -20
-Nov 04 13:39:57 vmi2881987 uvicorn[28194]:     await route.handle(scope, receive, send)
-Nov 04 13:39:57 vmi2881987 uvicorn[28194]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/routing.py", line 290, in handle
-Nov 04 13:39:57 vmi2881987 uvicorn[28194]:     await self.app(scope, receive, send)
-Nov 04 13:39:57 vmi2881987 uvicorn[28194]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/fastapi/routing.py", line 125, in app
-Nov 04 13:39:57 vmi2881987 uvicorn[28194]:     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
-Nov 04 13:39:57 vmi2881987 uvicorn[28194]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
-Nov 04 13:39:57 vmi2881987 uvicorn[28194]:     raise exc
-Nov 04 13:39:57 vmi2881987 uvicorn[28194]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
-Nov 04 13:39:57 vmi2881987 uvicorn[28194]:     await app(scope, receive, sender)
-Nov 04 13:39:57 vmi2881987 uvicorn[28194]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/fastapi/routing.py", line 111, in app
-Nov 04 13:39:57 vmi2881987 uvicorn[28194]:     response = await f(request)
-Nov 04 13:39:57 vmi2881987 uvicorn[28194]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/fastapi/routing.py", line 391, in app
-Nov 04 13:39:57 vmi2881987 uvicorn[28194]:     raw_response = await run_endpoint_function(
-Nov 04 13:39:57 vmi2881987 uvicorn[28194]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/fastapi/routing.py", line 290, in run_endpoint_function
-Nov 04 13:39:57 vmi2881987 uvicorn[28194]:     return await dependant.call(**values)
-Nov 04 13:39:57 vmi2881987 uvicorn[28194]:   File "/opt/connexa/api/admin.py", line 141, in first_run_post
-Nov 04 13:39:57 vmi2881987 uvicorn[28194]:     form = await request.form()
-Nov 04 13:39:57 vmi2881987 uvicorn[28194]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/requests.py", line 262, in _get_form
-Nov 04 13:39:57 vmi2881987 uvicorn[28194]:     assert parse_options_header is not None, (
-Nov 04 13:39:57 vmi2881987 uvicorn[28194]: AssertionError: The `python-multipart` library must be installed to use form parsing.
-root@vmi2881987:~# 
+Last login: Tue Nov  4 13:48:26 2025 from 113.189.109.248
+root@vmi2881987:~# cd /opt/connexa
+wget -O api/admin.py "https://raw.githubusercontent.com/mrolivershea-cyber/Connexa-Free-Proxy/copilot/fix-admin-panel-login/api/admin.py"
+--2025-11-05 00:04:58--  https://raw.githubusercontent.com/mrolivershea-cyber/Connexa-Free-Proxy/copilot/fix-admin-panel-login/api/admin.py
+Resolving raw.githubusercontent.com (raw.githubusercontent.com)... 2606:50c0:8000::154, 2606:50c0:8003::154, 2606:50c0:8002::154, ...
+Connecting to raw.githubusercontent.com (raw.githubusercontent.com)|2606:50c0:8000::154|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 8745 (8.5K) [text/plain]
+Saving to: ‘api/admin.py’
+
+api/admin.py        100%[===================>]   8.54K  --.-KB/s    in 0.001s  
+
+2025-11-05 00:04:58 (10.7 MB/s) - ‘api/admin.py’ saved [8745/8745]
+
+root@vmi2881987:/opt/connexa# grep -c "type=\"password\"" api/admin.py
+0
+root@vmi2881987:/opt/connexa# systemctl restart connexa-api
+root@vmi2881987:/opt/connexa# curl -s http://localhost:8080/admin/first-run | grep -c "Подтвердите пароль"
+1
+root@vmi2881987:/opt/connexa# 
