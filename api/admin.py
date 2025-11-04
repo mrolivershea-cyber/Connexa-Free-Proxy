@@ -124,10 +124,10 @@ def first_run_get():
 <h1>Создать пароль администратора</h1>
 <form method=\"POST\" action=\"/admin/first-run\">
   <label>Новый пароль
-    <input type=\"password\" name=\"new_password\" minlength=\"6\" required>
+    <input type=\"password\" name=\"new_password\" autocomplete=\"new-password\" minlength=\"6\" required>
   </label>
   <label>Подтвердите пароль
-    <input type=\"password\" name=\"confirm_password\" minlength=\"6\" required>
+    <input type=\"password\" name=\"confirm_password\" autocomplete=\"new-password\" minlength=\"6\" required>
   </label>
   <button type=\"submit\">Установить</button>
 </form>
@@ -161,14 +161,14 @@ def admin_change_get(creds: Optional[HTTPBasicCredentials] = Depends(security)):
 <h1>Сменить пароль</h1>
 <form method=\"POST\" action=\"/admin/change\">
   <label>Новый пароль
-    <input type=\"password\" name=\"new_password\" minlength=\"6\" required>
+    <input type=\"password\" name=\"new_password\" autocomplete=\"new-password\" minlength=\"6\" required>
   </label>
   <label>Подтвердите пароль
-    <input type=\"password\" name=\"confirm_password\" minlength=\"6\" required>
+    <input type=\"password\" name=\"confirm_password\" autocomplete=\"new-password\" minlength=\"6\" required>
   </label>
   <button type=\"submit\">Сменить</button>
 </form>
-<p class=\"note\">Требования: минимум 6 символов, без пробелов и двоеточия (:).</p>
+<parameter name="note\">Требования: минимум 6 символов, без пробелов и двоеточия (:).</p>
 """)
 
 @router.post("/admin/change")
