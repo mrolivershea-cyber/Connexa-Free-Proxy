@@ -168,7 +168,7 @@ def admin_change_get(creds: Optional[HTTPBasicCredentials] = Depends(security)):
   </label>
   <button type=\"submit\">Сменить</button>
 </form>
-<parameter name="note\">Требования: минимум 6 символов, без пробелов и двоеточия (:).</p>
+<p class=\"note\">Требования: минимум 6 символов, без пробелов и двоеточия (:).</p>
 """)
 
 @router.post("/admin/change")
