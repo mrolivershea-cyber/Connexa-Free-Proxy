@@ -81,8 +81,30 @@ systemd_units() {
   cp /opt/connexa/systemd/tor-rotate.timer /etc/systemd/system/
   cp /opt/connexa/systemd/geo-resolver.service /etc/systemd/system/
   cp /opt/connexa/systemd/geo-resolver.timer /etc/systemd/system/
+  
+  # Create connexa-api systemd service for auto-start
+  log "Creating connexa-api.service..."
+  cat > /etc/systemd/system/connexa-api.service <<'EOF'
+[Unit]
+Description=Connexa Free Proxy API Server
+After=network.target redis-server.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/connexa
+Environment="PATH=/opt/connexa/.venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+ExecStart=/opt/connexa/.venv/bin/uvicorn api.server:app --host 0.0.0.0 --port 8080
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+EOF
+  
   systemctl daemon-reload
-  systemctl enable tor-rotate.timer geo-resolver.timer
+  systemctl enable tor-rotate.timer geo-resolver.timer connexa-api.service
+  log "Auto-start enabled for connexa-api.service"
 }
 
 configure_firewall() {
@@ -109,11 +131,20 @@ python_env() {
 post_install() {
   log "Post-install checks..."
   /usr/local/bin/poolproxyctl status || true
+  
+  # Start API server
+  log "Starting connexa-api.service..."
+  systemctl start connexa-api.service
+  sleep 2
+  
   echo
   echo "=== Install complete ==="
   echo "Config: /etc/connexa/config.yaml"
   echo "CLI:    poolproxyctl help"
-  echo "API:    uvicorn api.server:app --host 0.0.0.0 --port 8080 (from /opt/connexa)"
+  echo "API:    http://your-server-ip:8080/admin (автозапуск включён)"
+  echo
+  echo "Статус API: systemctl status connexa-api"
+  echo "Логи API:   journalctl -u connexa-api -f"
 }
 
 main() {
