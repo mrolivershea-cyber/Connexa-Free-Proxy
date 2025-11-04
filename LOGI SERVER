@@ -1,4 +1,6 @@
-Last login: Tue Nov  4 18:32:37 on ttys000
+Last login: Tue Nov  4 19:06:31 on ttys000
+exchange@Mysteriouss-Air ~ % ЗкщчнПщщв124
+zsh: command not found: ЗкщчнПщщв124
 exchange@Mysteriouss-Air ~ % ssh root@195.26.255.18
 root@195.26.255.18's password: 
 Welcome to Ubuntu 22.04.5 LTS (GNU/Linux 5.15.0-160-generic x86_64)
@@ -7,13 +9,13 @@ Welcome to Ubuntu 22.04.5 LTS (GNU/Linux 5.15.0-160-generic x86_64)
  * Management:     https://landscape.canonical.com
  * Support:        https://ubuntu.com/pro
 
- System information as of Tue Nov  4 12:44:39 CET 2025
+ System information as of Tue Nov  4 13:12:16 CET 2025
 
   System load:           0.0
   Usage of /:            0.7% of 387.48GB
   Memory usage:          2%
   Swap usage:            0%
-  Processes:             154
+  Processes:             155
   Users logged in:       0
   IPv4 address for eth0: 195.26.255.18
   IPv6 address for eth0: 2605:a140:2288:1987::1
@@ -46,12 +48,13 @@ Welcome!
 This server is hosted by Contabo. If you have any questions or need help,
 please don't hesitate to contact us at support@contabo.com.
 
-Last login: Tue Nov  4 12:32:51 2025 from 113.189.109.248
-root@vmi2881987:~# curl -fsSL https://raw.githubusercontent.com/mrolivershea-cyber/Connexa-Free-Proxy/copilot/fix-admin-panel-login/scripts/connexa-free-proxy.sh | sudo DEBIAN_FRONTEND=noninteractive UCF_FORCE_CONFOLD=1 NEEDRESTART_MODE=a bash
+Last login: Tue Nov  4 13:06:46 2025 from 113.189.109.248
+root@vmi2881987:~# rm -rf /opt/connexa
+root@vmi2881987:~# curl -fsSL "https://raw.githubusercontent.com/mrolivershea-cyber/Connexa-Free-Proxy/copilot/fix-admin-panel-login/scripts/connexa-free-proxy.sh?$(date +%s)" | sudo DEBIAN_FRONTEND=noninteractive UCF_FORCE_CONFOLD=1 NEEDRESTART_MODE=a bash
 [install] Updating packages...
 Hit:1 http://archive.ubuntu.com/ubuntu jammy InRelease
-Hit:2 http://archive.ubuntu.com/ubuntu jammy-updates InRelease
-Hit:3 http://security.ubuntu.com/ubuntu jammy-security InRelease
+Hit:2 http://security.ubuntu.com/ubuntu jammy-security InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu jammy-updates InRelease
 Hit:4 http://archive.ubuntu.com/ubuntu jammy-backports InRelease
 Reading package lists... Done
 Reading package lists... Done
@@ -82,25 +85,71 @@ redis-server is already the newest version (5:6.0.16-1ubuntu1.1).
 [install] Creating connexa-api.service...
 [install] Auto-start enabled for connexa-api.service
 [install] Setting up Python venv...
-Requirement already satisfied: pip in /opt/connexa/.venv/lib/python3.10/site-packages (25.3)
-Requirement already satisfied: fastapi in /opt/connexa/.venv/lib/python3.10/site-packages (0.121.0)
-Requirement already satisfied: uvicorn in /opt/connexa/.venv/lib/python3.10/site-packages (0.38.0)
-Requirement already satisfied: click in /opt/connexa/.venv/lib/python3.10/site-packages (8.3.0)
-Requirement already satisfied: pyyaml in /opt/connexa/.venv/lib/python3.10/site-packages (6.0.3)
-Requirement already satisfied: redis in /opt/connexa/.venv/lib/python3.10/site-packages (7.0.1)
-Requirement already satisfied: starlette<0.50.0,>=0.40.0 in /opt/connexa/.venv/lib/python3.10/site-packages (from fastapi) (0.49.3)
-Requirement already satisfied: pydantic!=1.8,!=1.8.1,!=2.0.0,!=2.0.1,!=2.1.0,<3.0.0,>=1.7.4 in /opt/connexa/.venv/lib/python3.10/site-packages (from fastapi) (2.12.3)
-Requirement already satisfied: typing-extensions>=4.8.0 in /opt/connexa/.venv/lib/python3.10/site-packages (from fastapi) (4.15.0)
-Requirement already satisfied: annotated-doc>=0.0.2 in /opt/connexa/.venv/lib/python3.10/site-packages (from fastapi) (0.0.3)
-Requirement already satisfied: annotated-types>=0.6.0 in /opt/connexa/.venv/lib/python3.10/site-packages (from pydantic!=1.8,!=1.8.1,!=2.0.0,!=2.0.1,!=2.1.0,<3.0.0,>=1.7.4->fastapi) (0.7.0)
-Requirement already satisfied: pydantic-core==2.41.4 in /opt/connexa/.venv/lib/python3.10/site-packages (from pydantic!=1.8,!=1.8.1,!=2.0.0,!=2.0.1,!=2.1.0,<3.0.0,>=1.7.4->fastapi) (2.41.4)
-Requirement already satisfied: typing-inspection>=0.4.2 in /opt/connexa/.venv/lib/python3.10/site-packages (from pydantic!=1.8,!=1.8.1,!=2.0.0,!=2.0.1,!=2.1.0,<3.0.0,>=1.7.4->fastapi) (0.4.2)
-Requirement already satisfied: anyio<5,>=3.6.2 in /opt/connexa/.venv/lib/python3.10/site-packages (from starlette<0.50.0,>=0.40.0->fastapi) (4.11.0)
-Requirement already satisfied: exceptiongroup>=1.0.2 in /opt/connexa/.venv/lib/python3.10/site-packages (from anyio<5,>=3.6.2->starlette<0.50.0,>=0.40.0->fastapi) (1.3.0)
-Requirement already satisfied: idna>=2.8 in /opt/connexa/.venv/lib/python3.10/site-packages (from anyio<5,>=3.6.2->starlette<0.50.0,>=0.40.0->fastapi) (3.11)
-Requirement already satisfied: sniffio>=1.1 in /opt/connexa/.venv/lib/python3.10/site-packages (from anyio<5,>=3.6.2->starlette<0.50.0,>=0.40.0->fastapi) (1.3.1)
-Requirement already satisfied: h11>=0.8 in /opt/connexa/.venv/lib/python3.10/site-packages (from uvicorn) (0.16.0)
-Requirement already satisfied: async-timeout>=4.0.3 in /opt/connexa/.venv/lib/python3.10/site-packages (from redis) (5.0.1)
+Requirement already satisfied: pip in /opt/connexa/.venv/lib/python3.10/site-packages (22.0.2)
+Collecting pip
+  Using cached pip-25.3-py3-none-any.whl (1.8 MB)
+Installing collected packages: pip
+  Attempting uninstall: pip
+    Found existing installation: pip 22.0.2
+    Uninstalling pip-22.0.2:
+      Successfully uninstalled pip-22.0.2
+Successfully installed pip-25.3
+Collecting fastapi
+  Using cached fastapi-0.121.0-py3-none-any.whl.metadata (28 kB)
+Collecting uvicorn
+  Using cached uvicorn-0.38.0-py3-none-any.whl.metadata (6.8 kB)
+Collecting click
+  Using cached click-8.3.0-py3-none-any.whl.metadata (2.6 kB)
+Collecting pyyaml
+  Using cached pyyaml-6.0.3-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.4 kB)
+Collecting redis
+  Using cached redis-7.0.1-py3-none-any.whl.metadata (12 kB)
+Collecting starlette<0.50.0,>=0.40.0 (from fastapi)
+  Using cached starlette-0.49.3-py3-none-any.whl.metadata (6.4 kB)
+Collecting pydantic!=1.8,!=1.8.1,!=2.0.0,!=2.0.1,!=2.1.0,<3.0.0,>=1.7.4 (from fastapi)
+  Using cached pydantic-2.12.3-py3-none-any.whl.metadata (87 kB)
+Collecting typing-extensions>=4.8.0 (from fastapi)
+  Using cached typing_extensions-4.15.0-py3-none-any.whl.metadata (3.3 kB)
+Collecting annotated-doc>=0.0.2 (from fastapi)
+  Using cached annotated_doc-0.0.3-py3-none-any.whl.metadata (6.6 kB)
+Collecting annotated-types>=0.6.0 (from pydantic!=1.8,!=1.8.1,!=2.0.0,!=2.0.1,!=2.1.0,<3.0.0,>=1.7.4->fastapi)
+  Using cached annotated_types-0.7.0-py3-none-any.whl.metadata (15 kB)
+Collecting pydantic-core==2.41.4 (from pydantic!=1.8,!=1.8.1,!=2.0.0,!=2.0.1,!=2.1.0,<3.0.0,>=1.7.4->fastapi)
+  Using cached pydantic_core-2.41.4-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (7.3 kB)
+Collecting typing-inspection>=0.4.2 (from pydantic!=1.8,!=1.8.1,!=2.0.0,!=2.0.1,!=2.1.0,<3.0.0,>=1.7.4->fastapi)
+  Using cached typing_inspection-0.4.2-py3-none-any.whl.metadata (2.6 kB)
+Collecting anyio<5,>=3.6.2 (from starlette<0.50.0,>=0.40.0->fastapi)
+  Using cached anyio-4.11.0-py3-none-any.whl.metadata (4.1 kB)
+Collecting exceptiongroup>=1.0.2 (from anyio<5,>=3.6.2->starlette<0.50.0,>=0.40.0->fastapi)
+  Using cached exceptiongroup-1.3.0-py3-none-any.whl.metadata (6.7 kB)
+Collecting idna>=2.8 (from anyio<5,>=3.6.2->starlette<0.50.0,>=0.40.0->fastapi)
+  Using cached idna-3.11-py3-none-any.whl.metadata (8.4 kB)
+Collecting sniffio>=1.1 (from anyio<5,>=3.6.2->starlette<0.50.0,>=0.40.0->fastapi)
+  Using cached sniffio-1.3.1-py3-none-any.whl.metadata (3.9 kB)
+Collecting h11>=0.8 (from uvicorn)
+  Using cached h11-0.16.0-py3-none-any.whl.metadata (8.3 kB)
+Collecting async-timeout>=4.0.3 (from redis)
+  Using cached async_timeout-5.0.1-py3-none-any.whl.metadata (5.1 kB)
+Using cached fastapi-0.121.0-py3-none-any.whl (109 kB)
+Using cached pydantic-2.12.3-py3-none-any.whl (462 kB)
+Using cached pydantic_core-2.41.4-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.1 MB)
+Using cached starlette-0.49.3-py3-none-any.whl (74 kB)
+Using cached anyio-4.11.0-py3-none-any.whl (109 kB)
+Using cached uvicorn-0.38.0-py3-none-any.whl (68 kB)
+Using cached click-8.3.0-py3-none-any.whl (107 kB)
+Using cached pyyaml-6.0.3-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (770 kB)
+Using cached redis-7.0.1-py3-none-any.whl (339 kB)
+Using cached annotated_doc-0.0.3-py3-none-any.whl (5.5 kB)
+Using cached annotated_types-0.7.0-py3-none-any.whl (13 kB)
+Using cached async_timeout-5.0.1-py3-none-any.whl (6.2 kB)
+Using cached exceptiongroup-1.3.0-py3-none-any.whl (16 kB)
+Using cached h11-0.16.0-py3-none-any.whl (37 kB)
+Using cached idna-3.11-py3-none-any.whl (71 kB)
+Using cached sniffio-1.3.1-py3-none-any.whl (10 kB)
+Using cached typing_extensions-4.15.0-py3-none-any.whl (44 kB)
+Using cached typing_inspection-0.4.2-py3-none-any.whl (14 kB)
+Installing collected packages: typing-extensions, sniffio, pyyaml, idna, h11, click, async-timeout, annotated-types, annotated-doc, uvicorn, typing-inspection, redis, pydantic-core, exceptiongroup, pydantic, anyio, starlette, fastapi
+Successfully installed annotated-doc-0.0.3 annotated-types-0.7.0 anyio-4.11.0 async-timeout-5.0.1 click-8.3.0 exceptiongroup-1.3.0 fastapi-0.121.0 h11-0.16.0 idna-3.11 pydantic-2.12.3 pydantic-core-2.41.4 pyyaml-6.0.3 redis-7.0.1 sniffio-1.3.1 starlette-0.49.3 typing-extensions-4.15.0 typing-inspection-0.4.2 uvicorn-0.38.0
 [install] Post-install checks...
 {
   "pool_size": 50,
@@ -118,206 +167,13 @@ API:    http://your-server-ip:8080/admin (автозапуск включён)
 
 Статус API: systemctl status connexa-api
 Логи API:   journalctl -u connexa-api -f
-root@vmi2881987:~# journalctl -u connexa-api -n 200 --no-pager
-Nov 04 04:47:40 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/routing.py", line 736, in app
-Nov 04 04:47:40 vmi2881987 uvicorn[15131]:     await route.handle(scope, receive, send)
-Nov 04 04:47:40 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/routing.py", line 290, in handle
-Nov 04 04:47:40 vmi2881987 uvicorn[15131]:     await self.app(scope, receive, send)
-Nov 04 04:47:40 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/fastapi/routing.py", line 125, in app
-Nov 04 04:47:40 vmi2881987 uvicorn[15131]:     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
-Nov 04 04:47:40 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
-Nov 04 04:47:40 vmi2881987 uvicorn[15131]:     raise exc
-Nov 04 04:47:40 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
-Nov 04 04:47:40 vmi2881987 uvicorn[15131]:     await app(scope, receive, sender)
-Nov 04 04:47:40 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/fastapi/routing.py", line 111, in app
-Nov 04 04:47:40 vmi2881987 uvicorn[15131]:     response = await f(request)
-Nov 04 04:47:40 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/fastapi/routing.py", line 391, in app
-Nov 04 04:47:40 vmi2881987 uvicorn[15131]:     raw_response = await run_endpoint_function(
-Nov 04 04:47:40 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/fastapi/routing.py", line 290, in run_endpoint_function
-Nov 04 04:47:40 vmi2881987 uvicorn[15131]:     return await dependant.call(**values)
-Nov 04 04:47:40 vmi2881987 uvicorn[15131]:   File "/opt/connexa/api/admin.py", line 141, in first_run_post
-Nov 04 04:47:40 vmi2881987 uvicorn[15131]:     form = await request.form()
-Nov 04 04:47:40 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/requests.py", line 262, in _get_form
-Nov 04 04:47:40 vmi2881987 uvicorn[15131]:     assert parse_options_header is not None, (
-Nov 04 04:47:40 vmi2881987 uvicorn[15131]: AssertionError: The `python-multipart` library must be installed to use form parsing.
-Nov 04 04:50:09 vmi2881987 uvicorn[15131]: INFO:     37.49.148.104:58420 - "GET /cgi-bin/luci/%3Bstok%3D/locale HTTP/1.1" 404 Not Found
-Nov 04 04:50:49 vmi2881987 uvicorn[15131]: WARNING:  Invalid HTTP request received.
-Nov 04 04:50:53 vmi2881987 uvicorn[15131]: WARNING:  Invalid HTTP request received.
-Nov 04 04:50:54 vmi2881987 uvicorn[15131]: INFO:     199.45.154.141:57184 - "GET / HTTP/1.1" 404 Not Found
-Nov 04 04:50:58 vmi2881987 uvicorn[15131]: INFO:     199.45.154.141:57196 - "PRI %2A HTTP/2.0" 404 Not Found
-Nov 04 04:50:58 vmi2881987 uvicorn[15131]: WARNING:  Invalid HTTP request received.
-Nov 04 04:51:07 vmi2881987 uvicorn[15131]: WARNING:  Invalid HTTP request received.
-Nov 04 04:51:11 vmi2881987 uvicorn[15131]: INFO:     199.45.154.141:59236 - "GET /robots.txt HTTP/1.1" 404 Not Found
-Nov 04 05:16:15 vmi2881987 uvicorn[15131]: INFO:     45.135.193.2:40796 - "GET /login HTTP/1.1" 404 Not Found
-Nov 04 05:43:21 vmi2881987 uvicorn[15131]: INFO:     176.65.149.30:47590 - "GET /login HTTP/1.1" 404 Not Found
-Nov 04 06:14:21 vmi2881987 uvicorn[15131]: INFO:     74.249.184.13:49334 - "GET / HTTP/1.1" 404 Not Found
-Nov 04 06:32:09 vmi2881987 uvicorn[15131]: INFO:     204.76.203.219:56670 - "GET / HTTP/1.1" 404 Not Found
-Nov 04 07:16:07 vmi2881987 uvicorn[15131]: INFO:     3.86.43.235:51336 - "GET / HTTP/1.1" 404 Not Found
-Nov 04 07:54:51 vmi2881987 uvicorn[15131]: INFO:     204.76.203.212:59888 - "GET / HTTP/1.1" 404 Not Found
-Nov 04 08:26:45 vmi2881987 uvicorn[15131]: INFO:     204.76.203.219:47782 - "GET / HTTP/1.1" 404 Not Found
-Nov 04 08:55:46 vmi2881987 uvicorn[15131]: WARNING:  Invalid HTTP request received.
-Nov 04 08:55:46 vmi2881987 uvicorn[15131]: WARNING:  Invalid HTTP request received.
-Nov 04 08:55:46 vmi2881987 uvicorn[15131]: INFO:     165.227.47.160:46024 - "GET / HTTP/1.1" 404 Not Found
-Nov 04 08:55:47 vmi2881987 uvicorn[15131]: INFO:     165.227.47.160:46032 - "GET /download/powershell/ HTTP/1.1" 404 Not Found
-Nov 04 08:55:47 vmi2881987 uvicorn[15131]: INFO:     165.227.47.160:46036 - "GET /get.php HTTP/1.1" 404 Not Found
-Nov 04 09:55:01 vmi2881987 uvicorn[15131]: INFO:     176.119.25.235:59022 - "CONNECT google.com%3A443 HTTP/1.1" 404 Not Found
-Nov 04 10:09:16 vmi2881987 uvicorn[15131]: INFO:     37.49.148.104:56402 - "GET /cgi-bin/luci/%3Bstok%3D/locale HTTP/1.1" 404 Not Found
-Nov 04 10:22:43 vmi2881987 uvicorn[15131]: INFO:     204.76.203.219:58048 - "GET / HTTP/1.1" 404 Not Found
-Nov 04 10:23:15 vmi2881987 uvicorn[15131]: WARNING:  Invalid HTTP request received.
-Nov 04 10:23:15 vmi2881987 uvicorn[15131]: WARNING:  Invalid HTTP request received.
-Nov 04 10:28:12 vmi2881987 uvicorn[15131]: INFO:     64.62.156.108:43776 - "GET / HTTP/1.1" 404 Not Found
-Nov 04 10:28:40 vmi2881987 uvicorn[15131]: INFO:     64.62.156.119:25735 - "GET /favicon.ico HTTP/1.1" 404 Not Found
-Nov 04 10:28:56 vmi2881987 uvicorn[15131]: INFO:     64.62.156.111:22383 - "GET http%3A//api.ipify.org/?format=json HTTP/1.1" 404 Not Found
-Nov 04 10:29:00 vmi2881987 uvicorn[15131]: INFO:     64.62.156.118:56155 - "CONNECT www.shadowserver.org%3A443 HTTP/1.1" 404 Not Found
-Nov 04 10:29:13 vmi2881987 uvicorn[15131]: INFO:     64.62.156.108:24692 - "GET /geoserver/web/ HTTP/1.1" 404 Not Found
-Nov 04 10:58:34 vmi2881987 uvicorn[15131]: INFO:     204.76.203.212:41904 - "GET / HTTP/1.1" 404 Not Found
-Nov 04 12:30:33 vmi2881987 uvicorn[15131]: INFO:     204.76.203.219:52306 - "GET / HTTP/1.1" 404 Not Found
-Nov 04 12:43:25 vmi2881987 uvicorn[15131]: INFO:     113.189.109.248:57020 - "GET /admin/first-run HTTP/1.1" 200 OK
-Nov 04 12:43:31 vmi2881987 uvicorn[15131]: INFO:     172.225.56.34:17807 - "GET /apple-touch-icon.png HTTP/1.1" 404 Not Found
-Nov 04 12:43:31 vmi2881987 uvicorn[15131]: INFO:     172.225.56.34:11288 - "GET /apple-touch-icon-precomposed.png HTTP/1.1" 404 Not Found
-Nov 04 12:43:31 vmi2881987 uvicorn[15131]: INFO:     172.225.56.34:53947 - "GET /favicon.ico HTTP/1.1" 404 Not Found
-Nov 04 12:43:36 vmi2881987 uvicorn[15131]: INFO:     172.225.56.29:17282 - "GET /admin/first-run HTTP/1.1" 200 OK
-Nov 04 12:43:49 vmi2881987 uvicorn[15131]: INFO:     172.225.56.29:11597 - "POST /admin/first-run HTTP/1.1" 500 Internal Server Error
-Nov 04 12:43:49 vmi2881987 uvicorn[15131]: ERROR:    Exception in ASGI application
-Nov 04 12:43:49 vmi2881987 uvicorn[15131]: Traceback (most recent call last):
-Nov 04 12:43:49 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/uvicorn/protocols/http/h11_impl.py", line 403, in run_asgi
-Nov 04 12:43:49 vmi2881987 uvicorn[15131]:     result = await app(  # type: ignore[func-returns-value]
-Nov 04 12:43:49 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
-Nov 04 12:43:49 vmi2881987 uvicorn[15131]:     return await self.app(scope, receive, send)
-Nov 04 12:43:49 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/fastapi/applications.py", line 1134, in __call__
-Nov 04 12:43:49 vmi2881987 uvicorn[15131]:     await super().__call__(scope, receive, send)
-Nov 04 12:43:49 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/applications.py", line 113, in __call__
-Nov 04 12:43:49 vmi2881987 uvicorn[15131]:     await self.middleware_stack(scope, receive, send)
-Nov 04 12:43:49 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/middleware/errors.py", line 186, in __call__
-Nov 04 12:43:49 vmi2881987 uvicorn[15131]:     raise exc
-Nov 04 12:43:49 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/middleware/errors.py", line 164, in __call__
-Nov 04 12:43:49 vmi2881987 uvicorn[15131]:     await self.app(scope, receive, _send)
-Nov 04 12:43:49 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
-Nov 04 12:43:49 vmi2881987 uvicorn[15131]:     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
-Nov 04 12:43:49 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
-Nov 04 12:43:49 vmi2881987 uvicorn[15131]:     raise exc
-Nov 04 12:43:49 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
-Nov 04 12:43:49 vmi2881987 uvicorn[15131]:     await app(scope, receive, sender)
-Nov 04 12:43:49 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
-Nov 04 12:43:49 vmi2881987 uvicorn[15131]:     await self.app(scope, receive, send)
-Nov 04 12:43:49 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/routing.py", line 716, in __call__
-Nov 04 12:43:49 vmi2881987 uvicorn[15131]:     await self.middleware_stack(scope, receive, send)
-Nov 04 12:43:49 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/routing.py", line 736, in app
-Nov 04 12:43:49 vmi2881987 uvicorn[15131]:     await route.handle(scope, receive, send)
-Nov 04 12:43:49 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/routing.py", line 290, in handle
-Nov 04 12:43:49 vmi2881987 uvicorn[15131]:     await self.app(scope, receive, send)
-Nov 04 12:43:49 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/fastapi/routing.py", line 125, in app
-Nov 04 12:43:49 vmi2881987 uvicorn[15131]:     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
-Nov 04 12:43:49 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
-Nov 04 12:43:49 vmi2881987 uvicorn[15131]:     raise exc
-Nov 04 12:43:49 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
-Nov 04 12:43:49 vmi2881987 uvicorn[15131]:     await app(scope, receive, sender)
-Nov 04 12:43:49 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/fastapi/routing.py", line 111, in app
-Nov 04 12:43:49 vmi2881987 uvicorn[15131]:     response = await f(request)
-Nov 04 12:43:49 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/fastapi/routing.py", line 391, in app
-Nov 04 12:43:49 vmi2881987 uvicorn[15131]:     raw_response = await run_endpoint_function(
-Nov 04 12:43:49 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/fastapi/routing.py", line 290, in run_endpoint_function
-Nov 04 12:43:49 vmi2881987 uvicorn[15131]:     return await dependant.call(**values)
-Nov 04 12:43:49 vmi2881987 uvicorn[15131]:   File "/opt/connexa/api/admin.py", line 141, in first_run_post
-Nov 04 12:43:49 vmi2881987 uvicorn[15131]:     form = await request.form()
-Nov 04 12:43:49 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/requests.py", line 262, in _get_form
-Nov 04 12:43:49 vmi2881987 uvicorn[15131]:     assert parse_options_header is not None, (
-Nov 04 12:43:49 vmi2881987 uvicorn[15131]: AssertionError: The `python-multipart` library must be installed to use form parsing.
-Nov 04 12:45:23 vmi2881987 uvicorn[15131]: INFO:     172.225.56.34:11658 - "POST /admin/first-run HTTP/1.1" 500 Internal Server Error
-Nov 04 12:45:23 vmi2881987 uvicorn[15131]: ERROR:    Exception in ASGI application
-Nov 04 12:45:23 vmi2881987 uvicorn[15131]: Traceback (most recent call last):
-Nov 04 12:45:23 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/uvicorn/protocols/http/h11_impl.py", line 403, in run_asgi
-Nov 04 12:45:23 vmi2881987 uvicorn[15131]:     result = await app(  # type: ignore[func-returns-value]
-Nov 04 12:45:23 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
-Nov 04 12:45:23 vmi2881987 uvicorn[15131]:     return await self.app(scope, receive, send)
-Nov 04 12:45:23 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/fastapi/applications.py", line 1134, in __call__
-Nov 04 12:45:23 vmi2881987 uvicorn[15131]:     await super().__call__(scope, receive, send)
-Nov 04 12:45:23 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/applications.py", line 113, in __call__
-Nov 04 12:45:23 vmi2881987 uvicorn[15131]:     await self.middleware_stack(scope, receive, send)
-Nov 04 12:45:23 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/middleware/errors.py", line 186, in __call__
-Nov 04 12:45:23 vmi2881987 uvicorn[15131]:     raise exc
-Nov 04 12:45:23 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/middleware/errors.py", line 164, in __call__
-Nov 04 12:45:23 vmi2881987 uvicorn[15131]:     await self.app(scope, receive, _send)
-Nov 04 12:45:23 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
-Nov 04 12:45:23 vmi2881987 uvicorn[15131]:     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
-Nov 04 12:45:23 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
-Nov 04 12:45:23 vmi2881987 uvicorn[15131]:     raise exc
-Nov 04 12:45:23 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
-Nov 04 12:45:23 vmi2881987 uvicorn[15131]:     await app(scope, receive, sender)
-Nov 04 12:45:23 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
-Nov 04 12:45:23 vmi2881987 uvicorn[15131]:     await self.app(scope, receive, send)
-Nov 04 12:45:23 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/routing.py", line 716, in __call__
-Nov 04 12:45:23 vmi2881987 uvicorn[15131]:     await self.middleware_stack(scope, receive, send)
-Nov 04 12:45:23 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/routing.py", line 736, in app
-Nov 04 12:45:23 vmi2881987 uvicorn[15131]:     await route.handle(scope, receive, send)
-Nov 04 12:45:23 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/routing.py", line 290, in handle
-Nov 04 12:45:23 vmi2881987 uvicorn[15131]:     await self.app(scope, receive, send)
-Nov 04 12:45:23 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/fastapi/routing.py", line 125, in app
-Nov 04 12:45:23 vmi2881987 uvicorn[15131]:     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
-Nov 04 12:45:23 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
-Nov 04 12:45:23 vmi2881987 uvicorn[15131]:     raise exc
-Nov 04 12:45:23 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
-Nov 04 12:45:23 vmi2881987 uvicorn[15131]:     await app(scope, receive, sender)
-Nov 04 12:45:23 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/fastapi/routing.py", line 111, in app
-Nov 04 12:45:23 vmi2881987 uvicorn[15131]:     response = await f(request)
-Nov 04 12:45:23 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/fastapi/routing.py", line 391, in app
-Nov 04 12:45:23 vmi2881987 uvicorn[15131]:     raw_response = await run_endpoint_function(
-Nov 04 12:45:23 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/fastapi/routing.py", line 290, in run_endpoint_function
-Nov 04 12:45:23 vmi2881987 uvicorn[15131]:     return await dependant.call(**values)
-Nov 04 12:45:23 vmi2881987 uvicorn[15131]:   File "/opt/connexa/api/admin.py", line 141, in first_run_post
-Nov 04 12:45:23 vmi2881987 uvicorn[15131]:     form = await request.form()
-Nov 04 12:45:23 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/requests.py", line 262, in _get_form
-Nov 04 12:45:23 vmi2881987 uvicorn[15131]:     assert parse_options_header is not None, (
-Nov 04 12:45:23 vmi2881987 uvicorn[15131]: AssertionError: The `python-multipart` library must be installed to use form parsing.
-Nov 04 12:45:59 vmi2881987 uvicorn[15131]: INFO:     172.225.56.34:30111 - "GET /favicon.ico HTTP/1.1" 404 Not Found
-Nov 04 12:46:00 vmi2881987 uvicorn[15131]: INFO:     172.225.56.34:56082 - "GET /apple-touch-icon-precomposed.png HTTP/1.1" 404 Not Found
-Nov 04 12:46:00 vmi2881987 uvicorn[15131]: INFO:     172.225.56.34:14134 - "GET /apple-touch-icon.png HTTP/1.1" 404 Not Found
-Nov 04 12:46:01 vmi2881987 uvicorn[15131]: INFO:     172.225.56.55:36412 - "GET /admin/first-run HTTP/1.1" 200 OK
-Nov 04 12:46:13 vmi2881987 uvicorn[15131]: INFO:     172.225.56.55:54349 - "POST /admin/first-run HTTP/1.1" 500 Internal Server Error
-Nov 04 12:46:13 vmi2881987 uvicorn[15131]: ERROR:    Exception in ASGI application
-Nov 04 12:46:13 vmi2881987 uvicorn[15131]: Traceback (most recent call last):
-Nov 04 12:46:13 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/uvicorn/protocols/http/h11_impl.py", line 403, in run_asgi
-Nov 04 12:46:13 vmi2881987 uvicorn[15131]:     result = await app(  # type: ignore[func-returns-value]
-Nov 04 12:46:13 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
-Nov 04 12:46:13 vmi2881987 uvicorn[15131]:     return await self.app(scope, receive, send)
-Nov 04 12:46:13 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/fastapi/applications.py", line 1134, in __call__
-Nov 04 12:46:13 vmi2881987 uvicorn[15131]:     await super().__call__(scope, receive, send)
-Nov 04 12:46:13 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/applications.py", line 113, in __call__
-Nov 04 12:46:13 vmi2881987 uvicorn[15131]:     await self.middleware_stack(scope, receive, send)
-Nov 04 12:46:13 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/middleware/errors.py", line 186, in __call__
-Nov 04 12:46:13 vmi2881987 uvicorn[15131]:     raise exc
-Nov 04 12:46:13 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/middleware/errors.py", line 164, in __call__
-Nov 04 12:46:13 vmi2881987 uvicorn[15131]:     await self.app(scope, receive, _send)
-Nov 04 12:46:13 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
-Nov 04 12:46:13 vmi2881987 uvicorn[15131]:     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
-Nov 04 12:46:13 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
-Nov 04 12:46:13 vmi2881987 uvicorn[15131]:     raise exc
-Nov 04 12:46:13 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
-Nov 04 12:46:13 vmi2881987 uvicorn[15131]:     await app(scope, receive, sender)
-Nov 04 12:46:13 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
-Nov 04 12:46:13 vmi2881987 uvicorn[15131]:     await self.app(scope, receive, send)
-Nov 04 12:46:13 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/routing.py", line 716, in __call__
-Nov 04 12:46:13 vmi2881987 uvicorn[15131]:     await self.middleware_stack(scope, receive, send)
-Nov 04 12:46:13 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/routing.py", line 736, in app
-Nov 04 12:46:13 vmi2881987 uvicorn[15131]:     await route.handle(scope, receive, send)
-Nov 04 12:46:13 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/routing.py", line 290, in handle
-Nov 04 12:46:13 vmi2881987 uvicorn[15131]:     await self.app(scope, receive, send)
-Nov 04 12:46:13 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/fastapi/routing.py", line 125, in app
-Nov 04 12:46:13 vmi2881987 uvicorn[15131]:     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
-Nov 04 12:46:13 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
-Nov 04 12:46:13 vmi2881987 uvicorn[15131]:     raise exc
-Nov 04 12:46:13 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
-Nov 04 12:46:13 vmi2881987 uvicorn[15131]:     await app(scope, receive, sender)
-Nov 04 12:46:13 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/fastapi/routing.py", line 111, in app
-Nov 04 12:46:13 vmi2881987 uvicorn[15131]:     response = await f(request)
-Nov 04 12:46:13 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/fastapi/routing.py", line 391, in app
-Nov 04 12:46:13 vmi2881987 uvicorn[15131]:     raw_response = await run_endpoint_function(
-Nov 04 12:46:13 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/fastapi/routing.py", line 290, in run_endpoint_function
-Nov 04 12:46:13 vmi2881987 uvicorn[15131]:     return await dependant.call(**values)
-Nov 04 12:46:13 vmi2881987 uvicorn[15131]:   File "/opt/connexa/api/admin.py", line 141, in first_run_post
-Nov 04 12:46:13 vmi2881987 uvicorn[15131]:     form = await request.form()
-Nov 04 12:46:13 vmi2881987 uvicorn[15131]:   File "/opt/connexa/.venv/lib/python3.10/site-packages/starlette/requests.py", line 262, in _get_form
-Nov 04 12:46:13 vmi2881987 uvicorn[15131]:     assert parse_options_header is not None, (
-Nov 04 12:46:13 vmi2881987 uvicorn[15131]: AssertionError: The `python-multipart` library must be installed to use form parsing.
-root@vmi2881987:~# cat /opt/connexa/api/admin.py | grep -A 30 "first_run_page"
+root@vmi2881987:~# grep -c "Подтвердите пароль" /opt/connexa/api/admin.py
+2
+root@vmi2881987:~# # После завершения установки проверьте количество полей
+grep -c "Подтвердите пароль" /opt/connexa/api/admin.py
+2
+root@vmi2881987:~# systemctl restart connexa-api
+root@vmi2881987:~# # После завершения установки проверьте количество полей
+grep -c "Подтвердите пароль" /opt/connexa/api/admin.py
+2
 root@vmi2881987:~# 
