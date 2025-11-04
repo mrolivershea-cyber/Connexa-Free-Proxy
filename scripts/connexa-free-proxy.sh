@@ -46,10 +46,32 @@ setup_dirs() {
 }
 
 sync_repo_files() {
-  # Copy project files into /opt/connexa (assuming running from repo root)
-  SRC_DIR="$(cd "$(dirname "$BASH_SOURCE")/.." && pwd)"
-  rsync -a --exclude ".git" "$SRC_DIR/" /opt/connexa/
-  cp -n /opt/connexa/etc/connexa/config.yaml /etc/connexa/config.yaml || true
+  # Download and extract project files into /opt/connexa
+  log "Downloading Connexa Free Proxy..."
+  cd /tmp
+  rm -rf connexa-download connexa-temp
+  
+  # Download from GitHub
+  wget -q https://github.com/mrolivershea-cyber/Connexa-Free-Proxy/archive/refs/heads/copilot/fix-admin-panel-login.tar.gz -O connexa.tar.gz || \
+    die "Failed to download Connexa Free Proxy"
+  
+  # Extract
+  mkdir -p connexa-temp
+  tar xzf connexa.tar.gz -C connexa-temp --strip-components=1
+  
+  # Copy files to /opt/connexa (avoid rsync recursion issue)
+  rm -rf /opt/connexa/*
+  cp -r connexa-temp/* /opt/connexa/
+  
+  # Copy config if doesn't exist
+  if [[ ! -f /etc/connexa/config.yaml ]] && [[ -f /opt/connexa/etc/connexa/config.yaml ]]; then
+    cp /opt/connexa/etc/connexa/config.yaml /etc/connexa/config.yaml
+  fi
+  
+  # Cleanup
+  cd /
+  rm -rf /tmp/connexa.tar.gz /tmp/connexa-temp
+  log "Files copied to /opt/connexa"
 }
 
 systemd_units() {
