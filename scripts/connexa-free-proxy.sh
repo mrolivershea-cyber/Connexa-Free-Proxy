@@ -23,10 +23,20 @@ install_deps() {
   apt-get install -y curl jq ca-certificates gnupg lsb-release software-properties-common \
     tor haproxy build-essential python3 python3-venv python3-pip git netcat-openbsd \
     redis-server ufw nftables rsync
-  # 3proxy from upstream (or local build)
+  # 3proxy from source (not available in Ubuntu repos)
   if ! command -v 3proxy >/dev/null 2>&1; then
-    log "Installing 3proxy..."
-    apt-get install -y 3proxy || true
+    log "Installing 3proxy from source..."
+    cd /tmp
+    wget -q https://github.com/3proxy/3proxy/archive/0.9.4.tar.gz -O 3proxy.tar.gz
+    tar xzf 3proxy.tar.gz
+    cd 3proxy-0.9.4
+    make -f Makefile.Linux
+    mkdir -p /usr/local/bin /usr/local/etc/3proxy
+    cp bin/3proxy /usr/local/bin/
+    chmod +x /usr/local/bin/3proxy
+    cd /
+    rm -rf /tmp/3proxy-0.9.4 /tmp/3proxy.tar.gz
+    log "3proxy installed successfully"
   fi
 }
 
@@ -36,10 +46,32 @@ setup_dirs() {
 }
 
 sync_repo_files() {
-  # Copy project files into /opt/connexa (assuming running from repo root)
-  SRC_DIR="$(cd "$(dirname "$BASH_SOURCE")/.." && pwd)"
-  rsync -a --exclude ".git" "$SRC_DIR/" /opt/connexa/
-  cp -n /opt/connexa/etc/connexa/config.yaml /etc/connexa/config.yaml || true
+  # Download and extract project files into /opt/connexa
+  log "Downloading Connexa Free Proxy..."
+  cd /tmp
+  rm -rf connexa-download connexa-temp
+  
+  # Download from GitHub
+  wget -q https://github.com/mrolivershea-cyber/Connexa-Free-Proxy/archive/refs/heads/copilot/fix-admin-panel-login.tar.gz -O connexa.tar.gz || \
+    die "Failed to download Connexa Free Proxy"
+  
+  # Extract
+  mkdir -p connexa-temp
+  tar xzf connexa.tar.gz -C connexa-temp --strip-components=1
+  
+  # Copy files to /opt/connexa (avoid rsync recursion issue)
+  rm -rf /opt/connexa/*
+  cp -r connexa-temp/* /opt/connexa/
+  
+  # Copy config if doesn't exist
+  if [[ ! -f /etc/connexa/config.yaml ]] && [[ -f /opt/connexa/etc/connexa/config.yaml ]]; then
+    cp /opt/connexa/etc/connexa/config.yaml /etc/connexa/config.yaml
+  fi
+  
+  # Cleanup
+  cd /
+  rm -rf /tmp/connexa.tar.gz /tmp/connexa-temp
+  log "Files copied to /opt/connexa"
 }
 
 systemd_units() {
@@ -49,8 +81,30 @@ systemd_units() {
   cp /opt/connexa/systemd/tor-rotate.timer /etc/systemd/system/
   cp /opt/connexa/systemd/geo-resolver.service /etc/systemd/system/
   cp /opt/connexa/systemd/geo-resolver.timer /etc/systemd/system/
+  
+  # Create connexa-api systemd service for auto-start
+  log "Creating connexa-api.service..."
+  cat > /etc/systemd/system/connexa-api.service <<'EOF'
+[Unit]
+Description=Connexa Free Proxy API Server
+After=network.target redis-server.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/connexa
+Environment="PATH=/opt/connexa/.venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+ExecStart=/opt/connexa/.venv/bin/uvicorn api.server:app --host 0.0.0.0 --port 8080
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+EOF
+  
   systemctl daemon-reload
-  systemctl enable tor-rotate.timer geo-resolver.timer
+  systemctl enable tor-rotate.timer geo-resolver.timer connexa-api.service
+  log "Auto-start enabled for connexa-api.service"
 }
 
 configure_firewall() {
@@ -77,11 +131,20 @@ python_env() {
 post_install() {
   log "Post-install checks..."
   /usr/local/bin/poolproxyctl status || true
+  
+  # Start API server
+  log "Starting connexa-api.service..."
+  systemctl start connexa-api.service
+  sleep 2
+  
   echo
   echo "=== Install complete ==="
   echo "Config: /etc/connexa/config.yaml"
   echo "CLI:    poolproxyctl help"
-  echo "API:    uvicorn api.server:app --host 0.0.0.0 --port 8080 (from /opt/connexa)"
+  echo "API:    http://your-server-ip:8080/admin (автозапуск включён)"
+  echo
+  echo "Статус API: systemctl status connexa-api"
+  echo "Логи API:   journalctl -u connexa-api -f"
 }
 
 main() {
